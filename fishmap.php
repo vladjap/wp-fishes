@@ -31,8 +31,39 @@ function addAdminPageContent() {
     add_submenu_page( __FILE__, 'Fish relations', 'Fish relations', 'manage_options', 'fish-relations', 'fishRelationsPage');
 }
 function fishRelationsPage() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'fishes';
 
-    echo "// todo: Fish relations";
+    $result = $wpdb->get_results("SELECT * FROM $table_name");
+    echo "<br><br>";
+
+    echo '<form action="" method="post">';
+    echo "<select name='fish1'>";
+    foreach ($result as $print) {
+        echo "<option value='$print->fish_id'>$print->name</option>";
+    }
+    echo "</select>";
+
+    echo "<select name='fish2'>";
+    foreach ($result as $print) {
+        echo "<option value='$print->fish_id'>$print->name</option>";
+    }
+    echo "</select>";
+
+    echo "<select name='rule'>";
+    echo "<option value='da'>Moze</option>";
+    echo "<option value='ne'>Ne moze</option>";
+    echo "<option value='maybe'>Mozda</option>";
+    echo "</select>";
+
+
+    echo "<button id='set_new_relation' name='set_new_relation' type='submit'>Set rule</button>";
+
+    echo "</form>";
+
+    if (isset($_POST['set_new_relation'])) {
+        echo "// todo set_new_relation";
+    }
 }
 
 function fishesAdminPage() {
