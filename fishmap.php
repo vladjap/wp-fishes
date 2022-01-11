@@ -28,7 +28,13 @@ function fishesTable() {
 add_action('admin_menu', 'addAdminPageContent');
 function addAdminPageContent() {
     add_menu_page('Fish map', 'Fish map', 'manage_options' ,__FILE__, 'fishesAdminPage', 'dashicons-palmtree');
+    add_submenu_page( __FILE__, 'Fish relations', 'Fish relations', 'manage_options', 'fish-relations', 'fishRelationsPage');
 }
+function fishRelationsPage() {
+
+    echo "// todo: Fish relations";
+}
+
 function fishesAdminPage() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'fishes';
