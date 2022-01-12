@@ -17,6 +17,8 @@ function fishesTable() {
   `fish_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(220) DEFAULT NULL,
   `short_description` varchar(220) DEFAULT NULL,
+  `minimum_volume` varchar(220) DEFAULT NULL,
+  `largest_minimum_volume` varchar(220) DEFAULT NULL,
   PRIMARY KEY(fish_id)
   ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
   ";
@@ -72,14 +74,18 @@ function fishesAdminPage() {
     if (isset($_POST['newsubmit'])) {
         $name = $_POST['newname'];
         $shortDescription = $_POST['newshort_description'];
-        $wpdb->query("INSERT INTO $table_name(name,short_description) VALUES('$name','$shortDescription')");
+        $minimum_volume = $_POST['newminimum_volume'];
+        $largest_minimum_volume = $_POST['newlargest_minimum_volume'];
+        $wpdb->query("INSERT INTO $table_name(name,short_description,minimum_volume,largest_minimum_volume) VALUES('$name','$shortDescription','$minimum_volume','$largest_minimum_volume')");
         echo "<script>location.replace('admin.php?page=fishmap/fishmap.php');</script>";
     }
     if (isset($_POST['uptsubmit'])) {
         $id = $_POST['uptid'];
         $name = $_POST['uptname'];
         $shortDescription = $_POST['uptnewshort_description'];
-        $wpdb->query("UPDATE $table_name SET name='$name',short_description='$shortDescription' WHERE fish_id='$id'");
+        $minimum_volume = $_POST['uptnewminimum_volume'];
+        $largest_minimum_volume = $_POST['uptnewlargest_minimum_volume'];
+        $wpdb->query("UPDATE $table_name SET name='$name',short_description='$shortDescription',minimum_volume='$minimum_volume',largest_minimum_volume='$largest_minimum_volume' WHERE fish_id='$id'");
         echo "<script>location.replace('admin.php?page=fishmap/fishmap.php');</script>";
     }
     if (isset($_GET['del'])) {
@@ -96,6 +102,8 @@ function fishesAdminPage() {
                 <th width="25%">Fish ID</th>
                 <th width="25%">Name</th>
                 <th width="25%">Short description</th>
+                <th width="25%">Minimum volume</th>
+                <th width="25%">Largest minimum volume</th>
                 <th width="25%">Actions</th>
             </tr>
             </thead>
@@ -105,6 +113,8 @@ function fishesAdminPage() {
                     <td><input type="text" value="AUTO_GENERATED" disabled></td>
                     <td><input type="text" id="newname" name="newname"></td>
                     <td><input type="text" id="newshort_description" name="newshort_description"></td>
+                    <td><input type="text" id="newminimum_volume" name="newminimum_volume"></td>
+                    <td><input type="text" id="newlargest_minimum_volume" name="newlargest_minimum_volume"></td>
                     <td><button id="newsubmit" name="newsubmit" type="submit">INSERT</button></td>
                 </tr>
             </form>
@@ -116,6 +126,8 @@ function fishesAdminPage() {
                 <td width='25%'>$print->fish_id</td>
                 <td width='25%'>$print->name</td>
                 <td width='25%'>$print->short_description</td>
+                <td width='25%'>$print->minimum_volume</td>
+                <td width='25%'>$print->largest_minimum_volume</td>
                 <td width='25%'><a href='admin.php?page=fishmap/fishmap.php&upt=$print->fish_id'><button type='button'>UPDATE</button></a> <a href='admin.php?page=fishmap/fishmap.php&del=$print->fish_id'><button type='button'>DELETE</button></a></td>
               </tr>
             ";
@@ -132,6 +144,8 @@ function fishesAdminPage() {
             foreach($result as $print) {
                 $name = $print->name;
                 $shortDescription = $print->short_description;
+                $minimum_volume = $print->minimum_volume;
+                $largest_minimum_volume = $print->largest_minimum_volume;
             }
             echo "
         <table class='wp-list-table widefat striped'>
@@ -140,6 +154,8 @@ function fishesAdminPage() {
               <th width='25%'>Fish ID</th>
               <th width='25%'>Name</th>
               <th width='25%'>Short description</th>
+              <th width='25%'>Minimum volume</th>
+              <th width='25%'>Largest minimum volume</th>
               <th width='25%'>Actions</th>
             </tr>
           </thead>
@@ -149,6 +165,8 @@ function fishesAdminPage() {
                 <td width='25%'>$print->fish_id <input type='hidden' id='uptid' name='uptid' value='$print->fish_id'></td>
                 <td width='25%'><input type='text' id='uptname' name='uptname' value='$print->name'></td>
                 <td width='25%'><input type='text' id='uptnewshort_description' name='uptnewshort_description' value='$print->short_description'></td>
+                <td width='25%'><input type='text' id='uptnewminimum_volume' name='uptnewminimum_volume' value='$print->minimum_volume'></td>
+                <td width='25%'><input type='text' id='uptnewlargest_minimum_volume' name='uptnewlargest_minimum_volume' value='$print->largest_minimum_volume'></td>
                 <td width='25%'><button id='uptsubmit' name='uptsubmit' type='submit'>UPDATE</button> <a href='admin.php?page=fishmap/fishmap.php'><button type='button'>CANCEL</button></a></td>
               </tr>
             </form>
