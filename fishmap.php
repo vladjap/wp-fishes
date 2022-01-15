@@ -9,6 +9,7 @@ Author URI: https://appup.xyz/
 License: GPL2
 */
 register_activation_hook( __FILE__, 'fishesTable');
+
 function fishesTable() {
     global $wpdb;
     $charset_collate = $wpdb->get_charset_collate();
@@ -177,3 +178,42 @@ function fishesAdminPage() {
     </div>
     <?php
 }
+
+
+function fishesMapShortcodeCallback() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'fishes';
+    $htmlFishes = '';
+    $result = $wpdb->get_results("SELECT * FROM $table_name");
+            foreach ($result as $print) {
+                $htmlFishes = "
+              <tr>
+                <td width='25%'>$print->fish_id</td>
+                <td width='25%'>$print->name</td>
+                <td width='25%'>$print->short_description</td>
+                <td width='25%'>$print->minimum_volume</td>
+                <td width='25%'>$print->largest_minimum_volume</td>
+              </tr>
+            ";
+            }
+
+    $html = "<table>
+            <thead>
+            <tr>
+                <th >Fish ID</th>
+                <th >Name</th>
+                <th >Short description</th>
+                <th >Minimum volume</th>
+                <th >Largest minimum volume</th>
+            </tr>
+            </thead>
+            <tbody>
+                $htmlFishes
+            </tbody>
+        </table>";
+
+
+    return $html;
+}
+add_shortcode('fishes_map', 'fishesMapShortcodeCallback');
+
