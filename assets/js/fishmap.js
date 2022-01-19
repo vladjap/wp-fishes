@@ -1,0 +1,4 @@
+console.log(window);
+
+
+// fishmapParams

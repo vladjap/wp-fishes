@@ -1,219 +1,142 @@
-<?php
-/*
-Plugin Name: Fish map
-Plugin URI: https://appup.xyz/
-Description: Aquarium fish mapper
-Version: 1.0.0
-Author: Ajvan
-Author URI: https://appup.xyz/
-License: GPL2
-*/
-register_activation_hook( __FILE__, 'fishesTable');
+<?php // phpcs:ignore
+/**
+ * Plugin Name: Fishmap
+ * Plugin URI: site.com
+ * Description: Fishmap
+ * Author: Ajvan
+ * Author URI: https://site.com/
+ * Version: 1.0.0
+ * Text Domain: Fishmap
+ * Domain Path: /languages
+ *
+ * Copyright (c) 2021 x-pro
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-function fishesTable() {
-    global $wpdb;
-    $charset_collate = $wpdb->get_charset_collate();
-    $table_name = $wpdb->prefix . 'fishes';
-    $sql = "CREATE TABLE `$table_name` (
-  `fish_id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(220) DEFAULT NULL,
-  `short_description` varchar(220) DEFAULT NULL,
-  `minimum_volume` varchar(220) DEFAULT NULL,
-  `largest_minimum_volume` varchar(220) DEFAULT NULL,
-  PRIMARY KEY(fish_id)
-  ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-  ";
-    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
-    }
-}
-add_action('admin_menu', 'addAdminPageContent');
-function addAdminPageContent() {
-    add_menu_page('Fish map', 'Fish map', 'manage_options' ,__FILE__, 'fishesAdminPage', 'dashicons-palmtree');
-    add_submenu_page( __FILE__, 'Fish relations', 'Fish relations', 'manage_options', 'fish-relations', 'fishRelationsPage');
-}
-function fishRelationsPage() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'fishes';
-
-    $result = $wpdb->get_results("SELECT * FROM $table_name");
-    echo "<br><br>";
-
-    echo '<form action="" method="post">';
-    echo "<select name='fish1'>";
-    foreach ($result as $print) {
-        echo "<option value='$print->fish_id'>$print->name</option>";
-    }
-    echo "</select>";
-
-    echo "<select name='fish2'>";
-    foreach ($result as $print) {
-        echo "<option value='$print->fish_id'>$print->name</option>";
-    }
-    echo "</select>";
-
-    echo "<select name='rule'>";
-    echo "<option value='da'>Moze</option>";
-    echo "<option value='ne'>Ne moze</option>";
-    echo "<option value='maybe'>Mozda</option>";
-    echo "</select>";
-
-
-    echo "<button id='set_new_relation' name='set_new_relation' type='submit'>Set rule</button>";
-
-    echo "</form>";
-
-    if (isset($_POST['set_new_relation'])) {
-        echo "// todo set_new_relation";
-    }
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
 }
 
-function fishesAdminPage() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'fishes';
-    if (isset($_POST['newsubmit'])) {
-        $name = $_POST['newname'];
-        $shortDescription = $_POST['newshort_description'];
-        $minimum_volume = $_POST['newminimum_volume'];
-        $largest_minimum_volume = $_POST['newlargest_minimum_volume'];
-        $wpdb->query("INSERT INTO $table_name(name,short_description,minimum_volume,largest_minimum_volume) VALUES('$name','$shortDescription','$minimum_volume','$largest_minimum_volume')");
-        echo "<script>location.replace('admin.php?page=fishmap/fishmap.php');</script>";
-    }
-    if (isset($_POST['uptsubmit'])) {
-        $id = $_POST['uptid'];
-        $name = $_POST['uptname'];
-        $shortDescription = $_POST['uptnewshort_description'];
-        $minimum_volume = $_POST['uptnewminimum_volume'];
-        $largest_minimum_volume = $_POST['uptnewlargest_minimum_volume'];
-        $wpdb->query("UPDATE $table_name SET name='$name',short_description='$shortDescription',minimum_volume='$minimum_volume',largest_minimum_volume='$largest_minimum_volume' WHERE fish_id='$id'");
-        echo "<script>location.replace('admin.php?page=fishmap/fishmap.php');</script>";
-    }
-    if (isset($_GET['del'])) {
-        $del_id = $_GET['del'];
-        $wpdb->query("DELETE FROM $table_name WHERE fish_id='$del_id'");
-        echo "<script>location.replace('admin.php?page=fishmap/fishmap.php');</script>";
-    }
-    ?>
-    <div class="wrap">
-        <h2>Fish Operations</h2>
-        <table class="wp-list-table widefat striped">
-            <thead>
-            <tr>
-                <th width="25%">Fish ID</th>
-                <th width="25%">Name</th>
-                <th width="25%">Short description</th>
-                <th width="25%">Minimum volume</th>
-                <th width="25%">Largest minimum volume</th>
-                <th width="25%">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <form action="" method="post">
-                <tr>
-                    <td><input type="text" value="AUTO_GENERATED" disabled></td>
-                    <td><input type="text" id="newname" name="newname"></td>
-                    <td><input type="text" id="newshort_description" name="newshort_description"></td>
-                    <td><input type="text" id="newminimum_volume" name="newminimum_volume"></td>
-                    <td><input type="text" id="newlargest_minimum_volume" name="newlargest_minimum_volume"></td>
-                    <td><button id="newsubmit" name="newsubmit" type="submit">INSERT</button></td>
-                </tr>
-            </form>
-            <?php
-            $result = $wpdb->get_results("SELECT * FROM $table_name");
-            foreach ($result as $print) {
-                echo "
-              <tr>
-                <td width='25%'>$print->fish_id</td>
-                <td width='25%'>$print->name</td>
-                <td width='25%'>$print->short_description</td>
-                <td width='25%'>$print->minimum_volume</td>
-                <td width='25%'>$print->largest_minimum_volume</td>
-                <td width='25%'><a href='admin.php?page=fishmap/fishmap.php&upt=$print->fish_id'><button type='button'>UPDATE</button></a> <a href='admin.php?page=fishmap/fishmap.php&del=$print->fish_id'><button type='button'>DELETE</button></a></td>
-              </tr>
-            ";
+/**
+ * Constants
+ */
+define( 'FISHMAP_MAIN_FILE', __FILE__ );
+define( 'FISHMAP_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
+define( 'FISHMAP_PLUGIN_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
+define( 'FISHMAP_PLUGIN_VERSION', '1.3.0' );
+
+if ( ! class_exists( 'Fishmap' ) ) {
+    /**
+     * Class Fishmap
+     */
+    class Fishmap {
+
+        /**
+         * The reference the *Singleton* instance of this class.
+         *
+         * @var $instance
+         */
+        protected static $instance;
+
+
+
+        /**
+         * Returns the *Singleton* instance of this class.
+         *
+         * @return self::$instance The *Singleton* instance.
+         */
+        public static function get_instance() {
+            if ( null === self::$instance ) {
+                self::$instance = new self();
             }
-            ?>
-            </tbody>
-        </table>
-        <br>
-        <br>
-        <?php
-        if (isset($_GET['upt'])) {
-            $upt_id = $_GET['upt'];
-            $result = $wpdb->get_results("SELECT * FROM $table_name WHERE fish_id='$upt_id'");
-            foreach($result as $print) {
-                $name = $print->name;
-                $shortDescription = $print->short_description;
-                $minimum_volume = $print->minimum_volume;
-                $largest_minimum_volume = $print->largest_minimum_volume;
-            }
-            echo "
-        <table class='wp-list-table widefat striped'>
-          <thead>
-            <tr>
-              <th width='25%'>Fish ID</th>
-              <th width='25%'>Name</th>
-              <th width='25%'>Short description</th>
-              <th width='25%'>Minimum volume</th>
-              <th width='25%'>Largest minimum volume</th>
-              <th width='25%'>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <form action='' method='post'>
-              <tr>
-                <td width='25%'>$print->fish_id <input type='hidden' id='uptid' name='uptid' value='$print->fish_id'></td>
-                <td width='25%'><input type='text' id='uptname' name='uptname' value='$print->name'></td>
-                <td width='25%'><input type='text' id='uptnewshort_description' name='uptnewshort_description' value='$print->short_description'></td>
-                <td width='25%'><input type='text' id='uptnewminimum_volume' name='uptnewminimum_volume' value='$print->minimum_volume'></td>
-                <td width='25%'><input type='text' id='uptnewlargest_minimum_volume' name='uptnewlargest_minimum_volume' value='$print->largest_minimum_volume'></td>
-                <td width='25%'><button id='uptsubmit' name='uptsubmit' type='submit'>UPDATE</button> <a href='admin.php?page=fishmap/fishmap.php'><button type='button'>CANCEL</button></a></td>
-              </tr>
-            </form>
-          </tbody>
-        </table>";
+
+            return self::$instance;
         }
-        ?>
-    </div>
-    <?php
+
+        /**
+         * Notices (array)
+         *
+         * @var array
+         */
+        public $notices = array();
+
+        /**
+         * Protected constructor to prevent creating a new instance of the
+         * *Singleton* via the `new` operator from outside of this class.
+         */
+        protected function __construct() {
+            add_action( 'plugins_loaded', array( $this, 'init' ) );
+            register_activation_hook( __FILE__, array( $this, 'generateTables' ) );
+
+        }
+
+        public function generateTables() {
+            require_once __DIR__ . '/classes/class-fishmap-db.php';
+            Fishmap_DB::generateTables();
+        }
+
+        /**
+         * Init the plugin after plugins_loaded so environment variables are set.
+         */
+        public function init() {
+            load_plugin_textdomain( 'fishmap', false, plugin_basename( __DIR__ ) . '/languages' );
+            add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
+            $this->include_files();
+        }
+
+        /**
+         * Adds plugin action links
+         *
+         * @param array $links Plugin action link before filtering.
+         *
+         * @return array Filtered links.
+         */
+        public function plugin_action_links( $links ) {
+//            $setting_link = "#";
+            $plugin_links = array(
+//                '<a href="' . $setting_link . '">' . __( 'Settings', 'wp-plugfish' ) . '</a>',
+                '<a href="http://site.com/">' . __( 'Support', 'fishmap' ) . '</a>',
+            );
+
+            return array_merge( $plugin_links, $links );
+        }
+
+        /**
+         * Includes the files for the plugin
+         *
+         * @return void
+         */
+        public function include_files() {
+            include_once FISHMAP_PLUGIN_PATH . '/classes/class-fishmap-assets.php';
+            include_once FISHMAP_PLUGIN_PATH . '/classes/class-fishmap-db.php';
+            include_once FISHMAP_PLUGIN_PATH . '/classes/class-fishmap-shortcode.php';
+            include_once FISHMAP_PLUGIN_PATH . '/classes/class-fishmap-admin.php';
+
+        }
+
+    }
+    Fishmap::get_instance();
 }
 
-
-function fishesMapShortcodeCallback() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'fishes';
-    $htmlFishes = '';
-    $result = $wpdb->get_results("SELECT * FROM $table_name");
-            foreach ($result as $print) {
-                $htmlFishes = "
-              <tr>
-                <td width='25%'>$print->fish_id</td>
-                <td width='25%'>$print->name</td>
-                <td width='25%'>$print->short_description</td>
-                <td width='25%'>$print->minimum_volume</td>
-                <td width='25%'>$print->largest_minimum_volume</td>
-              </tr>
-            ";
-            }
-
-    $html = "<table>
-            <thead>
-            <tr>
-                <th >Fish ID</th>
-                <th >Name</th>
-                <th >Short description</th>
-                <th >Minimum volume</th>
-                <th >Largest minimum volume</th>
-            </tr>
-            </thead>
-            <tbody>
-                $htmlFishes
-            </tbody>
-        </table>";
-
-
-    return $html;
+/**
+ * Main instance Fishmap.
+ *
+ * Returns the main instance of Fishmap.
+ *
+ * @return Fishmap
+ */
+function FM() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
+    return Fishmap::get_instance();
 }
-add_shortcode('fishes_map', 'fishesMapShortcodeCallback');
-
