@@ -33,8 +33,6 @@ class Fishmap_Admin {
     }
 
     public function fishesAdminPage() {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'fishes';
         if (isset($_POST['newsubmit'])) {
             $name = $_POST['newname'];
             $shortDescription = $_POST['newshort_description'];
@@ -83,7 +81,7 @@ class Fishmap_Admin {
                     </tr>
                 </form>
                 <?php
-                $result = $wpdb->get_results("SELECT * FROM $table_name");
+                $result = Fishmap_DB::getAllFishes();
                 foreach ($result as $print) {
                     echo "
               <tr>
@@ -104,7 +102,7 @@ class Fishmap_Admin {
             <?php
             if (isset($_GET['upt'])) {
                 $upt_id = $_GET['upt'];
-                $result = $wpdb->get_results("SELECT * FROM $table_name WHERE fish_id='$upt_id'");
+                $result = Fishmap_DB::getFishById($upt_id);
                 foreach($result as $print) {
                     $name = $print->name;
                     $shortDescription = $print->short_description;
@@ -142,16 +140,9 @@ class Fishmap_Admin {
         <?php
     }
     public function fishRelationsPage() {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'fishes';
+        $result = Fishmap_DB::getAllFishes();
+        $result1 = Fishmap_DB::getAllRules();
 
-        $result = $wpdb->get_results("SELECT * FROM $table_name");
-
-        $sqlForAllRelations = "
-SELECT name, (SELECT name FROM wp_fishes WHERE fish_id = wp_fishes_relations.second_fish_id) as second_fish_name, wp_fishes_relations.status FROM wp_fishes
-JOIN wp_fishes_relations ON wp_fishes.fish_id = wp_fishes_relations.fish_id";
-
-        $result1 = $wpdb->get_results($sqlForAllRelations);
         $htmlFishRelations = '';
         foreach ($result1 as $print) {
             $htmlFishRelations .= "
@@ -203,15 +194,12 @@ JOIN wp_fishes_relations ON wp_fishes.fish_id = wp_fishes_relations.fish_id";
         </table>";
 
         if (isset($_POST['set_new_relation'])) {
-            $result2 = $wpdb->get_results('SELECT * FROM wp_fishes_relations WHERE fish_id = ' . $_POST['fish1'] . ' AND second_fish_id = ' . $_POST['fish2']);
-            $sql = '';
+            $result2 = Fishmap_DB::getRelationByIds($_POST['fish1'], $_POST['fish2']);
             if ($result2) {
-                $sql = "UPDATE `wp_fishes_relations` SET `status` = '" . $_POST['rule'] . "' WHERE `wp_fishes_relations`.`fishes_relation_id` = " . $result2[0]->fishes_relation_id;
+                Fishmap_DB::updateRelation($result2[0]->fishes_relation_id, $_POST['rule']);
             } else {
-                $sql = "INSERT INTO `wp_fishes_relations` ( `fish_id`, `second_fish_id`, `status`) VALUES ( '" . $_POST['fish1'] . "', '" . $_POST['fish2'] . "', '" . $_POST['rule'] . "')";
+                Fishmap_DB::insertRelation($_POST['fish1'], $_POST['fish2'], $_POST['rule']);
             }
-            $wpdb->query($sql);
-
             echo "<script>location.replace('admin.php?page=fish-relations');</script>";
 
         }

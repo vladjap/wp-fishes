@@ -105,4 +105,35 @@ class Fishmap_DB {
         $sql = "SELECT name, (SELECT name FROM $table_name WHERE fish_id = wp_fishes_relations.second_fish_id) as second_fish_name, wp_fishes_relations.status FROM wp_fishes JOIN wp_fishes_relations ON wp_fishes.fish_id = wp_fishes_relations.fish_id WHERE wp_fishes.fish_id = ". $id . " AND wp_fishes_relations.second_fish_id = " . $secondId;
         return $wpdb->get_results($sql);
     }
+
+    public static function getAllRules() {
+        global $wpdb;
+        $sqlForAllRelations = "
+SELECT name, (SELECT name FROM wp_fishes WHERE fish_id = wp_fishes_relations.second_fish_id) as second_fish_name, wp_fishes_relations.status FROM wp_fishes
+JOIN wp_fishes_relations ON wp_fishes.fish_id = wp_fishes_relations.fish_id";
+
+        return $wpdb->get_results($sqlForAllRelations);
+    }
+
+    public static function getRelationByIds($id, $secondId) {
+        global $wpdb;
+        return $wpdb->get_results('SELECT * FROM wp_fishes_relations WHERE fish_id = ' . $id . ' AND second_fish_id = ' . $secondId);
+    }
+
+    public static function updateRelation($relationId, $rule) {
+        global $wpdb;
+        $sql = "UPDATE `wp_fishes_relations` SET `status` = '" . $rule . "' WHERE `wp_fishes_relations`.`fishes_relation_id` = " . $relationId;
+        $wpdb->query($sql);
+    }
+    public static function insertRelation($fishId, $secondFishId, $rule) {
+        global $wpdb;
+        $sql = "INSERT INTO `wp_fishes_relations` ( `fish_id`, `second_fish_id`, `status`) VALUES ( '" . $fishId . "', '" . $secondFishId . "', '" . $rule . "')";
+        $wpdb->query($sql);
+    }
+
+    public static function getFishById($id) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . self::TABLE_NAME_FISHES;
+        return $wpdb->get_results("SELECT * FROM $table_name WHERE fish_id='$id'");
+    }
 }
