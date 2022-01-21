@@ -64,89 +64,129 @@ class Fishmap_Shortcode {
         }
         $selectedFish = $selectedFish[0];
         $selectedResult = Fishmap_DB::getRulesById($selectValue);
-        $compatibleFishsTRTagsHtml = '';
-        $incompatibleFishsTRTagsHtml = '';
-        $maybeFishesTRTagsHtml = '';
+        $compatibleFishsTRTagsHtmlFirstFish = '';
+        $incompatibleFishsTRTagsHtmlFirstFish = '';
+        $maybeFishesTRTagsHtmlFirstFish = '';
         foreach ($selectedResult as $print) {
             if ($print->status === 'da') {
-                $compatibleFishsTRTagsHtml .= $this->createRuleTableTR('compatible', $print->second_fish_name);
+                $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name);
             } else if ($print->status === 'ne') {
-                $incompatibleFishsTRTagsHtml .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+                $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
             } else if ($print->status === 'maybe') {
-                $maybeFishesTRTagsHtml .= $this->createRuleTableTR('maybe', $print->second_fish_name);
+                $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('maybe', $print->second_fish_name);
             }
         }
 
         $selectedFishHtml = $this->createSelectedFishHtml($selectedFish);
-        $compatibleRuleTable = $this->createRuleTable($compatibleFishsTRTagsHtml, 'Compatible with', 'compatible');
-        $incompatibleRuleTable = $this->createRuleTable($incompatibleFishsTRTagsHtml, 'Incompatible with', 'incompatible');
-        $maybeRuleTable = $this->createRuleTable($maybeFishesTRTagsHtml, 'Caution', 'maybe');
+        $compatibleRuleTable = $this->createRuleTable($compatibleFishsTRTagsHtmlFirstFish, 'Compatible with', 'compatible');
+        $incompatibleRuleTable = $this->createRuleTable($incompatibleFishsTRTagsHtmlFirstFish, 'Incompatible with', 'incompatible');
+        $maybeRuleTable = $this->createRuleTable($maybeFishesTRTagsHtmlFirstFish, 'Caution', 'maybe');
 
         return  "
-            $selectedFishHtml
+            <div class='fishmap-selected-first-fish'>
+                <h3>Selected fish</h3>
+                $selectedFishHtml
+            </div>
             <div class='fishmap-rule-tables-wrapper'>
                 $compatibleRuleTable
                 $incompatibleRuleTable
                 $maybeRuleTable
             </div>
-            <style>
-                .fishmap-rule-tables-wrapper {
-                    display: flex;
-                }
-                .fishmap-rule-table-tr  {
-                    
-                }
-                .fishmap-rule-table-wrapper {
-                    margin: 5px;
-                }
-            </style>
         ";
     }
 
-    private function handleBothSelectSelected($selectValue, $secondSelectValue) {
-
-        $htmlFishRelationsTable = '';
-        $selectedResult = Fishmap_DB::getRulesByBothIds($selectValue, $secondSelectValue);
-        $htmlFishRelations = '';
-        foreach ($selectedResult as $print) {
-            $htmlFishRelations .= "
-              <tr>
-                <td>$print->name</td>
-                <td>$print->second_fish_name</td>
-                <td>$print->status</td>
-              </tr>
-            ";
+    private function isAllIncompatible($selectedFirstFishResultResult, $selectedSecondFishResultResult) {
+        for($j = 0; $j < count($selectedFirstFishResultResult); $j++ ) {
+            for ($i = 0; $i < count($selectedSecondFishResultResult); $i++) {
+                if ($selectedFirstFishResultResult[$j]->second_fish_id === $selectedSecondFishResultResult[$i]->fish_id && $selectedFirstFishResultResult[$j]->status === 'ne') {
+                    return true;
+                }
+            }
         }
-        $htmlFishRelationsTable .= "
-            <table>
-                <thead>
-                <tr>
-                    <th >Name</th>
-                    <th >Second fish name</th>
-                    <th >Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                    $htmlFishRelations
-                </tbody>
-            </table>";
-        return $htmlFishRelationsTable;
+        return false;
     }
 
-    private function createTableRow($result) {
-        $htmlFishes = '';
-        foreach ($result as $print) {
-            $htmlFishes .= "
-              <tr>
-                <td>$print->fish_id</td>
-                <td>$print->name</td>
-                <td>$print->short_description</td>
-                <td>$print->minimum_volume</td>
-                <td>$print->largest_minimum_volume</td>
-              </tr>
-            ";
+    private function handleBothSelectSelected($selectValue, $secondSelectValue) {
+        $selectedFirstFish = Fishmap_DB::getFishById($selectValue);
+        $selectedSecondFish = Fishmap_DB::getFishById($secondSelectValue);
+        if (!$selectedFirstFish) {
+            return "Selected fish not exists";
         }
-        return $htmlFishes;
+        if (!$selectedSecondFish) {
+            return "Selected second fish not exists";
+        }
+
+        $selectedFirstFish = $selectedFirstFish[0];
+        $selectedSecondFish = $selectedSecondFish[0];
+        $selectedFirstFishResultResult = Fishmap_DB::getRulesById($selectValue);
+        $selectedSecondFishResultResult = Fishmap_DB::getRulesById($secondSelectValue);
+        $compatibleFishsTRTagsHtmlFirstFish = '';
+        $incompatibleFishsTRTagsHtmlFirstFish = '';
+        $maybeFishesTRTagsHtmlFirstFish = '';
+
+        // ako prva dva izabrana nisu kompatibilna sve ulazi u ne
+        // ako su prva dva kompatibilna onda poredimo dalje
+        // kada u pricu udje treca riba, poredi se sa prve 2 i jedno ne je ne.
+        // Jedno mozda i jedno da su mozda.
+        // Mozda i ne su ne
+        $isAllIncompatible = $this->isAllIncompatible($selectedFirstFishResultResult, $selectedSecondFishResultResult);
+        foreach ($selectedFirstFishResultResult as $print) {
+            if ($print->status === 'ne' || $isAllIncompatible) {
+                $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+            }
+            if ($print->status !== 'ne' && !$isAllIncompatible) {
+                for ($i = 0; $i < count($selectedSecondFishResultResult); $i++) {
+                    if ($print->status === 'da' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
+                        if ($selectedSecondFishResultResult[$i]->status === 'da') {
+                            $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name);
+                            break;
+                        } else if ($selectedSecondFishResultResult[$i]->status === 'ne') {
+                            $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+                            break;
+                        } else if ($selectedSecondFishResultResult[$i]->status === 'maybe') {
+                            $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('maybe', $print->second_fish_name);
+                        }
+                    } else if ($print->status === 'ne' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
+                        $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+                        break;
+                    } else if ($print->status === 'maybe' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
+                        if ($selectedSecondFishResultResult[$i]->status === 'da') {
+                            $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('maybe', $print->second_fish_name);
+                            break;
+                        } else if ($selectedSecondFishResultResult[$i]->status === 'ne') {
+                            $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+                            break;
+                        } else if ($selectedSecondFishResultResult[$i]->status === 'maybe') {
+                            $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('maybe', $print->second_fish_name);
+                        }
+                    }
+                }
+            }
+        }
+
+        $selectedFirstFishHtml = $this->createSelectedFishHtml($selectedFirstFish);
+        $selectedSecondFishHtml = $this->createSelectedFishHtml($selectedSecondFish);
+        $compatibleRuleTableFirstFish = $this->createRuleTable($compatibleFishsTRTagsHtmlFirstFish, 'Compatible with', 'compatible');
+        $incompatibleRuleTableFirstFish = $this->createRuleTable($incompatibleFishsTRTagsHtmlFirstFish, 'Incompatible with', 'incompatible');
+        $maybeRuleTableFirstFish = $this->createRuleTable($maybeFishesTRTagsHtmlFirstFish, 'Caution', 'maybe');
+
+        return  "
+            <div class='fishmap-selected-fishes-wrapper'>
+                <div class='fishmap-selected-first-fish'>
+                    <h3>First selected fish</h3>
+                    $selectedFirstFishHtml
+                </div>
+                <div class='fishmap-selected-second-fish'>
+                    <h3>Second selected fish</h3>
+                    $selectedSecondFishHtml
+                </div>
+            </div>
+            <div class='fishmap-rule-tables-wrapper'>
+                $compatibleRuleTableFirstFish
+                $incompatibleRuleTableFirstFish
+                $maybeRuleTableFirstFish
+            </div>
+        ";
     }
 
     private function generateForm($result) {
@@ -182,25 +222,11 @@ class Fishmap_Shortcode {
             $htmlFishRelationsTable = $this->handleBothSelectSelected($_POST['test-select'], $_POST['second-select']);
         }
 
-        $htmlFishes = $this->createTableRow($result);
         $htmlSelectForm =$this->generateForm($result);
 
         return "
-        $htmlFishRelationsTable
-        $htmlSelectForm
-        <table>
-            <thead>
-            <tr>
-                <th >Fish ID</th>
-                <th >Name</th>
-                <th >Short description</th>
-                <th >Minimum volume</th>
-                <th >Largest minimum volume</th>
-            </tr>
-            </thead>
-            <tbody>
-                $htmlFishes
-            </tbody>
-        </table>";
+            $htmlSelectForm
+            $htmlFishRelationsTable
+       ";
     }
 } new Fishmap_Shortcode();

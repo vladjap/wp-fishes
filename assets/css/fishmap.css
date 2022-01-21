@@ -1,0 +1,25 @@
+.fishmap-rule-tables-wrapper {
+    display: flex;
+}
+.fishmap-rule-table-tr  {
+
+}
+.fishmap-rule-table-wrapper {
+    margin: 5px;
+}
+.fishmap-selected-fishes-wrapper {
+    display: flex;
+}
+.fishmap-selected-second-fish {
+    border: 1px solid gray;
+    padding: 5px 10px;
+    margin-left: 10px;
+
+}
+.fishmap-selected-first-fish {
+    border: 1px solid gray;
+    padding: 5px 10px;
+}
+.fishmap-selected-first-fish h3, .fishmap-selected-second-fish h3 {
+    border-bottom: 1px solid gray;
+}

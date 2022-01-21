@@ -96,7 +96,7 @@ class Fishmap_DB {
     public static function getRulesById($id) {
         global $wpdb;
         $table_name = $wpdb->prefix . self::TABLE_NAME_FISHES;
-        $sql = "SELECT name, (SELECT name FROM $table_name WHERE fish_id = wp_fishes_relations.second_fish_id) as second_fish_name, wp_fishes_relations.status FROM wp_fishes JOIN wp_fishes_relations ON wp_fishes.fish_id = wp_fishes_relations.fish_id WHERE wp_fishes.fish_id = ". $id;
+        $sql = "SELECT wp_fishes.fish_id, name, (SELECT name FROM $table_name WHERE fish_id = wp_fishes_relations.second_fish_id) as second_fish_name, (SELECT fish_id FROM $table_name WHERE fish_id = wp_fishes_relations.second_fish_id) as second_fish_id, wp_fishes_relations.status FROM wp_fishes JOIN wp_fishes_relations ON wp_fishes.fish_id = wp_fishes_relations.fish_id WHERE wp_fishes.fish_id = ". $id;
         return $wpdb->get_results($sql);
     }
     public static function getRulesByBothIds($id, $secondId) {
