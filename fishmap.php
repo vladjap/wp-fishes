@@ -119,6 +119,7 @@ if ( ! class_exists( 'Fishmap' ) ) {
          * @return void
          */
         public function include_files() {
+            include_once FISHMAP_PLUGIN_PATH . '/includes/utils.php';
             include_once FISHMAP_PLUGIN_PATH . '/classes/class-fishmap-assets.php';
             include_once FISHMAP_PLUGIN_PATH . '/classes/class-fishmap-db.php';
             include_once FISHMAP_PLUGIN_PATH . '/classes/class-fishmap-shortcode.php';

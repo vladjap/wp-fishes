@@ -22,33 +22,85 @@ class Fishmap_Shortcode {
         add_shortcode('fishes_map', [$this, 'fishesMapShortcodeCallback']);
     }
 
-    private function handleSingleSelectSelected($selectValue) {
-        $htmlFishRelationsTable = '';
-        $selectedResult = Fishmap_DB::getRulesById($selectValue);
-        $htmlFishRelations = '';
-        foreach ($selectedResult as $print) {
-            $htmlFishRelations .= "
-              <tr>
-                <td>$print->name</td>
-                <td>$print->second_fish_name</td>
-                <td>$print->status</td>
-              </tr>
-            ";
+    private function createRuleTableTR($rule, $text) {
+        return  "
+          <tr class='fishmap-rule-table-tr fishmap-$rule-tr'>
+            <td>$text</td>
+          </tr>
+        ";
+    }
+
+    private function createSelectedFishHtml($selectedFish) {
+        if (!$selectedFish) {
+            return '';
         }
-        $htmlFishRelationsTable .= "
-            <table>
-                <thead>
-                <tr>
-                    <th >Name</th>
-                    <th >Second fish name</th>
-                    <th >Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                    $htmlFishRelations
-                </tbody>
-            </table>";
-        return $htmlFishRelationsTable;
+        return "
+        <div>
+            <div>name: $selectedFish->name</div>
+            <div>short_description: $selectedFish->short_description</div>
+            <div>minimum_volume: $selectedFish->minimum_volume</div>
+            <div>largest_minimum_volume: $selectedFish->largest_minimum_volume</div>
+        </div>
+        ";
+    }
+
+    private function createRuleTable($fishsTRTagsHtml, $thTitle, $rule) {
+        return "
+        <div class='fishmap-rule-table-wrapper fishmap-rule-table-wrapper-$rule'>
+            <table class='fishmap-rule-tables-table'>
+              <tr>
+                <th>$thTitle</th>
+              </tr>
+              $fishsTRTagsHtml
+            </table>
+        </div>
+        ";
+    }
+
+    private function handleSingleSelectSelected($selectValue) {
+        $selectedFish = Fishmap_DB::getFishById($selectValue);
+        if (!$selectedFish) {
+            return "Selected fish not exists";
+        }
+        $selectedFish = $selectedFish[0];
+        $selectedResult = Fishmap_DB::getRulesById($selectValue);
+        $compatibleFishsTRTagsHtml = '';
+        $incompatibleFishsTRTagsHtml = '';
+        $maybeFishesTRTagsHtml = '';
+        foreach ($selectedResult as $print) {
+            if ($print->status === 'da') {
+                $compatibleFishsTRTagsHtml .= $this->createRuleTableTR('compatible', $print->second_fish_name);
+            } else if ($print->status === 'ne') {
+                $incompatibleFishsTRTagsHtml .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+            } else if ($print->status === 'maybe') {
+                $maybeFishesTRTagsHtml .= $this->createRuleTableTR('maybe', $print->second_fish_name);
+            }
+        }
+
+        $selectedFishHtml = $this->createSelectedFishHtml($selectedFish);
+        $compatibleRuleTable = $this->createRuleTable($compatibleFishsTRTagsHtml, 'Compatible with', 'compatible');
+        $incompatibleRuleTable = $this->createRuleTable($incompatibleFishsTRTagsHtml, 'Incompatible with', 'incompatible');
+        $maybeRuleTable = $this->createRuleTable($maybeFishesTRTagsHtml, 'Caution', 'maybe');
+
+        return  "
+            $selectedFishHtml
+            <div class='fishmap-rule-tables-wrapper'>
+                $compatibleRuleTable
+                $incompatibleRuleTable
+                $maybeRuleTable
+            </div>
+            <style>
+                .fishmap-rule-tables-wrapper {
+                    display: flex;
+                }
+                .fishmap-rule-table-tr  {
+                    
+                }
+                .fishmap-rule-table-wrapper {
+                    margin: 5px;
+                }
+            </style>
+        ";
     }
 
     private function handleBothSelectSelected($selectValue, $secondSelectValue) {
