@@ -141,9 +141,10 @@ class Fishmap_Admin {
     }
     public function fishRelationsPage() {
         $result = Fishmap_DB::getAllFishes();
-        $result1 = Fishmap_DB::getAllRules();
-
+        $result1 = Fishmap_DB::getAllRules($_GET['orderBy']);
+        $siteUrl = get_site_url();
         $htmlFishRelations = '';
+
         foreach ($result1 as $print) {
             $htmlFishRelations .= "
               <tr>
@@ -183,9 +184,9 @@ class Fishmap_Admin {
         echo "<table class='wp-list-table widefat striped fishmap-admin-rules-table'>
             <thead>
             <tr>
-                <th >Name</th>
-                <th >Second fish name</th>
-                <th >Status</th>
+                <th ><a href='$siteUrl/wp-admin/admin.php?page=fish-relations&orderBy=name'>Name</a></th>
+                <th ><a href='$siteUrl/wp-admin/admin.php?page=fish-relations&orderBy=second_fish_name'>Second fish name</a></th>
+                <th ><a href='$siteUrl/wp-admin/admin.php?page=fish-relations&orderBy=status'>Status</a></th>
             </tr>
             </thead>
             <tbody>
