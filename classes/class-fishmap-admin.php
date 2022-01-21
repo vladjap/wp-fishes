@@ -196,10 +196,17 @@ class Fishmap_Admin {
 
         if (isset($_POST['set_new_relation'])) {
             $result2 = Fishmap_DB::getRelationByIds($_POST['fish1'], $_POST['fish2']);
-            if ($result2) {
+            $result2Reversed = Fishmap_DB::getRelationByIds($_POST['fish2'], $_POST['fish1']);
+            if ($result2 && $result2Reversed) {
                 Fishmap_DB::updateRelation($result2[0]->fishes_relation_id, $_POST['rule']);
+                if ($_POST['fish2'] !== $_POST['fish1']) {
+                    Fishmap_DB::updateRelation($result2Reversed[0]->fishes_relation_id, $_POST['rule']);
+                }
             } else {
                 Fishmap_DB::insertRelation($_POST['fish1'], $_POST['fish2'], $_POST['rule']);
+                if ($_POST['fish2'] !== $_POST['fish1']) {
+                    Fishmap_DB::insertRelation($_POST['fish2'], $_POST['fish1'], $_POST['rule']);
+                }
             }
             echo "<script>location.replace('admin.php?page=fish-relations');</script>";
 
