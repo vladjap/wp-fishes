@@ -70,8 +70,13 @@ class Fishmap_Assets {
      * @hook admin_enqueue_scripts
      */
     public function enqueue_admin_scripts() {
-        wp_register_script( 'fishmap-admin', FISHMAP_PLUGIN_URL . '/assets/js/admin.fishmap.js', true, FISHMAP_PLUGIN_VERSION, true );
+
+        wp_register_script( 'fishmap-admin', FISHMAP_PLUGIN_URL . '/assets/js/admin.fishmap.js', array( 'jquery' ), FISHMAP_PLUGIN_VERSION, true );
         wp_enqueue_script( 'fishmap-admin' );
+
+        // Select2
+        wp_register_script( 'select2', FISHMAP_PLUGIN_URL . '/assets/select2/dist/js/select2.js', array( 'jquery' ), FISHMAP_PLUGIN_VERSION, true );
+        wp_enqueue_script( 'select2' );
     }
 
     /**
@@ -82,6 +87,12 @@ class Fishmap_Assets {
         wp_enqueue_style(
             'fishmap-admin',
             plugins_url( 'assets/css/fishmap-admin.css', FISHMAP_MAIN_FILE ),
+            array(),
+            FISHMAP_PLUGIN_VERSION
+        );
+        wp_enqueue_style(
+            'select2',
+            plugins_url( 'assets/select2/dist/css/select2.min.css', FISHMAP_MAIN_FILE ),
             array(),
             FISHMAP_PLUGIN_VERSION
         );

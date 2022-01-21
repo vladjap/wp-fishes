@@ -1,0 +1,25 @@
+.fishmap-admin-rules-table {
+    max-width: 700px;
+}
+
+.fishmap-admin-add-rule-form {
+    display: flex;
+    padding: 20px 0 20px 0;
+}
+#set_new_relation {
+    margin-left: 30px;
+}
+
+.fishmap-admin-add-rule-form-title {
+    margin-top: 100px;
+}
+
+.fishmap-rule-fish-select-input {
+    width: 150px;
+}
+
+.fishmap-rule-fish-select-input-fish2,
+.fishmap-rule-fish-select-input-rule {
+    margin-left: 20px;
+}
+

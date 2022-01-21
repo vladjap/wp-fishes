@@ -154,33 +154,33 @@ class Fishmap_Admin {
             ";
         }
 
-        echo "<br><br>";
-
-        echo '<form action="" method="post">';
-        echo "<select name='fish1'>";
+        echo "<h2 class='fishmap-admin-add-rule-form-title'>Add rule</h2>";
+        echo "<span class='fishmap-admin-add-rule-form-description'>*(if you choose existing combination it will be updated)</span>";
+        echo '<form class="fishmap-admin-add-rule-form" action="" method="post">';
+        echo "<select class='fishmap-rule-fish-select-input' name='fish1'>";
         foreach ($result as $print) {
             echo "<option value='$print->fish_id'>$print->name</option>";
         }
         echo "</select>";
 
-        echo "<select name='fish2'>";
+        echo "<div class='fishmap-rule-fish-select-input-fish2'><select class='fishmap-rule-fish-select-input fishmap-rule-fish-select-input-fish2' name='fish2'>";
         foreach ($result as $print) {
             echo "<option value='$print->fish_id'>$print->name</option>";
         }
-        echo "</select>";
+        echo "</select></div>";
 
-        echo "<select name='rule'>";
+        echo "<div class='fishmap-rule-fish-select-input-rule'><select class='fishmap-rule-fish-select-input' name='rule'>";
         echo "<option value='da'>Moze</option>";
         echo "<option value='ne'>Ne moze</option>";
         echo "<option value='maybe'>Mozda</option>";
-        echo "</select>";
+        echo "</select></div>";
 
 
         echo "<button id='set_new_relation' name='set_new_relation' type='submit'>Set rule</button>";
 
         echo "</form>";
 
-        echo "<table>
+        echo "<table class='wp-list-table widefat striped fishmap-admin-rules-table'>
             <thead>
             <tr>
                 <th >Name</th>
