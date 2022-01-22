@@ -181,7 +181,13 @@ class Fishmap_Admin {
 
         echo "</form>";
 
-        echo "<table class='wp-list-table widefat striped fishmap-admin-rules-table'>
+        echo "
+        <div class='fishmap-relations-search-wrapper'>
+            <input id='relations-table-search-input' type='text' onkeyup='searchHTMLTableNames(0, \"relations-table-search-input\", \"relations-table-search-table\")' placeholder='Search for name' />
+            <input id='relations-table-search-input-second' type='text' onkeyup='searchHTMLTableNames(1, \"relations-table-search-input-second\", \"relations-table-search-table\")' placeholder='Search for second names..' />
+        </div>
+        
+        <table id='relations-table-search-table' class='wp-list-table widefat striped fishmap-admin-rules-table'>
             <thead>
             <tr>
                 <th ><a href='$siteUrl/wp-admin/admin.php?page=fish-relations&orderBy=name'>Name</a></th>

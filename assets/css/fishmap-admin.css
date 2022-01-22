@@ -5,6 +5,9 @@
 .fishmap-admin-add-rule-form {
     display: flex;
     padding: 20px 0 20px 0;
+    border-bottom: 1px solid gray;
+    margin-bottom: 20px;
+    max-width: 700px;
 }
 #set_new_relation {
     margin-left: 30px;
@@ -19,3 +22,6 @@
     margin-left: 20px;
 }
 
+.fishmap-relations-search-wrapper {
+    margin-bottom: 20px;
+}
