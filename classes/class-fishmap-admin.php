@@ -57,46 +57,16 @@ class Fishmap_Admin {
         }
         ?>
         <div class="wrap">
-            <h2>Fish Operations</h2>
-            <table class="wp-list-table widefat striped">
-                <thead>
-                <tr>
-                    <th width="25%">Fish ID</th>
-                    <th width="25%">Name</th>
-                    <th width="25%">Short description</th>
-                    <th width="25%">Minimum volume</th>
-                    <th width="25%">Largest minimum volume</th>
-                    <th width="25%">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <form action="" method="post">
-                    <tr>
-                        <td><input type="text" value="AUTO_GENERATED" disabled></td>
-                        <td><input type="text" id="newname" name="newname"></td>
-                        <td><input type="text" id="newshort_description" name="newshort_description"></td>
-                        <td><input type="text" id="newminimum_volume" name="newminimum_volume"></td>
-                        <td><input type="text" id="newlargest_minimum_volume" name="newlargest_minimum_volume"></td>
-                        <td><button id="newsubmit" name="newsubmit" type="submit">INSERT</button></td>
-                    </tr>
-                </form>
-                <?php
-                $result = Fishmap_DB::getAllFishes();
-                foreach ($result as $print) {
-                    echo "
-              <tr>
-                <td width='25%'>$print->fish_id</td>
-                <td width='25%'>$print->name</td>
-                <td width='25%'>$print->short_description</td>
-                <td width='25%'>$print->minimum_volume</td>
-                <td width='25%'>$print->largest_minimum_volume</td>
-                <td width='25%'><a href='admin.php?page=" . __FILE__ . "&upt=$print->fish_id'><button type='button'>UPDATE</button></a> <a href='admin.php?page=" . __FILE__ . "&del=$print->fish_id'><button type='button'>DELETE</button></a></td>
-              </tr>
-            ";
-                }
-                ?>
-                </tbody>
-            </table>
+            <h2>Add new fish</h2>
+            <form class="fishmap-admin-add-new-fish-form" action="" method="post">
+                <div class='fishmap-admin-add-fish-form-description'>*(This is for adding new fish)</div>
+                <div class="fishmap-add-new-fish-input-wrapper"><input type="text" id="newname" name="newname" placeholder="Name"></div>
+                <div class="fishmap-add-new-fish-input-wrapper"><input type="text" id="newshort_description" name="newshort_description" placeholder="Short description"></div>
+                <div class="fishmap-add-new-fish-input-wrapper"><input type="text" id="newminimum_volume" name="newminimum_volume" placeholder="Minimum volume"></div>
+                <div class="fishmap-add-new-fish-input-wrapper"><input type="text" id="newlargest_minimum_volume" name="newlargest_minimum_volume" placeholder="Largest minimum volume"></div>
+                <div class="fishmap-add-new-fish-input-wrapper"><button id="newsubmit" name="newsubmit" type="submit">INSERT</button></div>
+            </form>
+
             <br>
             <br>
             <?php
@@ -110,7 +80,9 @@ class Fishmap_Admin {
                     $largest_minimum_volume = $print->largest_minimum_volume;
                 }
                 echo "
-        <table class='wp-list-table widefat striped'>
+        <h2>Update fish</h2>
+        <div class='update-form-description'>*(Update selected fish)</div>
+        <table class='wp-list-table widefat striped fishmap-admin-update-fish-form-table'>
           <thead>
             <tr>
               <th width='25%'>Fish ID</th>
@@ -136,6 +108,37 @@ class Fishmap_Admin {
         </table>";
             }
             ?>
+            <h2>Fish table</h2>
+            <input id='fishmap-fish-table-search-input' type='text' onkeyup='searchHTMLTableNames(0, "fishmap-fish-table-search-input", "fishmap-fish-table")' placeholder='Search for name' />
+            <table id="fishmap-fish-table" class="wp-list-table widefat striped">
+                <thead>
+                <tr>
+<!--                    <th width="25%">Fish ID</th>-->
+                    <th width="25%">Name</th>
+                    <th width="25%">Short description</th>
+                    <th width="25%">Minimum volume</th>
+                    <th width="25%">Largest minimum volume</th>
+                    <th width="25%">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php
+                $result = Fishmap_DB::getAllFishes();
+                foreach ($result as $print) {
+                    echo "
+              <tr>
+<!--                 <td width='25%'>$print->fish_id</td>-->
+                <td width='25%'>$print->name</td>
+                <td width='25%'>$print->short_description</td>
+                <td width='25%'>$print->minimum_volume</td>
+                <td width='25%'>$print->largest_minimum_volume</td>
+                <td width='25%'><a href='admin.php?page=" . __FILE__ . "&upt=$print->fish_id'><button type='button'>UPDATE</button></a> <a href='admin.php?page=" . __FILE__ . "&del=$print->fish_id'><button type='button'>DELETE</button></a></td>
+              </tr>
+            ";
+                }
+                ?>
+                </tbody>
+            </table>
         </div>
         <?php
     }
