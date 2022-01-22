@@ -33,6 +33,7 @@ class Fishmap_Admin {
     }
 
     public function fishesAdminPage() {
+        $siteUrl = get_site_url();
         if (isset($_POST['newsubmit'])) {
             $name = $_POST['newname'];
             $shortDescription = $_POST['newshort_description'];
@@ -114,7 +115,7 @@ class Fishmap_Admin {
                 <thead>
                 <tr>
 <!--                    <th width="25%">Fish ID</th>-->
-                    <th width="25%">Name</th>
+                    <th width="25%"><a href="<?php echo $siteUrl . "/wp-admin/admin.php?page=" . __FILE__ . "&orderBy=name" ?>">Name</a></th>
                     <th width="25%">Short description</th>
                     <th width="25%">Minimum volume</th>
                     <th width="25%">Largest minimum volume</th>
@@ -123,7 +124,7 @@ class Fishmap_Admin {
                 </thead>
                 <tbody>
                 <?php
-                $result = Fishmap_DB::getAllFishes();
+                $result = Fishmap_DB::getAllFishes($_GET['orderBy'] ? $_GET['orderBy'] : 'name');
                 foreach ($result as $print) {
                     echo "
               <tr>

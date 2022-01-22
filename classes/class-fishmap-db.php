@@ -68,11 +68,15 @@ class Fishmap_DB {
         }
     }
 
-    public static function getAllFishes() {
+    public static function getAllFishes($orderBy) {
         global $wpdb;
+        $orderByQueryPart = '';
+        if ($orderBy) {
+            $orderByQueryPart = ' ORDER BY ' . $orderBy;
+        }
         $table_name = $wpdb->prefix . self::TABLE_NAME_FISHES;
 
-        return $wpdb->get_results("SELECT * FROM $table_name");
+        return $wpdb->get_results("SELECT * FROM $table_name" . $orderByQueryPart);
     }
 
     public static function insertNewFish($name, $shortDescription, $minimum_volume, $largest_minimum_volume) {
