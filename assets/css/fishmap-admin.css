@@ -25,3 +25,32 @@
 .fishmap-relations-search-wrapper {
     margin-bottom: 20px;
 }
+
+.fishmap-add-new-fish-input-wrapper {
+    margin-bottom: 10px;
+}
+
+.fishmap-admin-add-new-fish-form {
+    border-bottom: 1px solid gray;
+    max-width: 500px;
+    margin-bottom: 20px;
+}
+#newsubmit {
+    margin-bottom: 10px;
+}
+
+.fishmap-admin-add-fish-form-description {
+    margin-bottom: 10px;
+    margin-top: 20px;
+}
+
+.fishmap-admin-update-fish-form-table {
+    margin-bottom: 20px;
+}
+
+.update-form-description {
+    margin-bottom: 10px;
+}
+#fishmap-fish-table {
+    margin-top: 10px;
+}
