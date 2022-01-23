@@ -175,9 +175,9 @@ class Fishmap_Admin {
         echo "</select></div>";
 
         echo "<div class='fishmap-rule-fish-select-input-rule'><select class='fishmap-rule-fish-select-input' name='rule'>";
-        echo "<option value='da'>Moze</option>";
-        echo "<option value='ne'>Ne moze</option>";
-        echo "<option value='maybe'>Mozda</option>";
+        echo "<option value='yes'>Yes</option>";
+        echo "<option value='no'>No</option>";
+        echo "<option value='caution'>Caution</option>";
         echo "</select></div>";
 
 
