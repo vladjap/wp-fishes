@@ -68,7 +68,7 @@ class Fishmap_DB {
         }
     }
 
-    public static function getAllFishes($orderBy) {
+    public static function getAllFishes($orderBy = null) {
         global $wpdb;
         $orderByQueryPart = '';
         if ($orderBy) {
