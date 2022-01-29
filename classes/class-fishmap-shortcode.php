@@ -95,11 +95,37 @@ class Fishmap_Shortcode {
         ";
     }
 
-    private function isAllIncompatible($selectedFirstFishResultResult, $selectedSecondFishResultResult) {
-        for($j = 0; $j < count($selectedFirstFishResultResult); $j++ ) {
-            for ($i = 0; $i < count($selectedSecondFishResultResult); $i++) {
-                if ($selectedFirstFishResultResult[$j]->second_fish_id === $selectedSecondFishResultResult[$i]->fish_id && $selectedFirstFishResultResult[$j]->status === 'no') {
-                    return true;
+    private function isAllIncompatible($selectedFirstFishResultResult, $selectedSecondFishResultResult, $selectedThirdFishResultResult = null) {
+        if ($selectedThirdFishResultResult) {
+            for($j = 0; $j < count($selectedFirstFishResultResult); $j++ ) {
+                for ($i = 0; $i < count($selectedSecondFishResultResult); $i++) {
+                    if ($selectedFirstFishResultResult[$j]->second_fish_id === $selectedSecondFishResultResult[$i]->fish_id && $selectedFirstFishResultResult[$j]->status === 'no') {
+                        return true;
+                    }
+                }
+            }
+            for($j = 0; $j < count($selectedFirstFishResultResult); $j++ ) {
+                for ($i = 0; $i < count($selectedThirdFishResultResult); $i++) {
+                    if ($selectedFirstFishResultResult[$j]->second_fish_id === $selectedThirdFishResultResult[$i]->fish_id && $selectedFirstFishResultResult[$j]->status === 'no') {
+                        return true;
+                    }
+                }
+            }
+            for($j = 0; $j < count($selectedSecondFishResultResult); $j++ ) {
+                for ($i = 0; $i < count($selectedThirdFishResultResult); $i++) {
+                    if ($selectedSecondFishResultResult[$j]->second_fish_id === $selectedThirdFishResultResult[$i]->fish_id && $selectedSecondFishResultResult[$j]->status === 'no') {
+                        return true;
+                    }
+                }
+            }
+//            die('dada1');
+
+        } else {
+            for($j = 0; $j < count($selectedFirstFishResultResult); $j++ ) {
+                for ($i = 0; $i < count($selectedSecondFishResultResult); $i++) {
+                    if ($selectedFirstFishResultResult[$j]->second_fish_id === $selectedSecondFishResultResult[$i]->fish_id && $selectedFirstFishResultResult[$j]->status === 'no') {
+                        return true;
+                    }
                 }
             }
         }
@@ -219,35 +245,241 @@ class Fishmap_Shortcode {
         // kada u pricu udje treca riba, poredi se sa prve 2 i jedno ne je ne.
         // Jedno mozda i jedno da su mozda.
         // Mozda i ne su ne
-        $isAllIncompatible = $this->isAllIncompatible($selectedFirstFishResultResult, $selectedSecondFishResultResult);
+        $isAllIncompatible = $this->isAllIncompatible($selectedFirstFishResultResult, $selectedSecondFishResultResult, $selectedThirdFishResultResult);
         foreach ($selectedFirstFishResultResult as $print) {
             if ($print->status === 'no' || $isAllIncompatible) {
                 $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
             }
             if ($print->status !== 'no' && !$isAllIncompatible) {
                 for ($i = 0; $i < count($selectedSecondFishResultResult); $i++) {
-                    if ($print->status === 'yes' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
-                        if ($selectedSecondFishResultResult[$i]->status === 'yes') {
-                            $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name);
-                            break;
+                    if ($print->status === 'yes' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) { // ovde proveravamo prvu i drugu
+                        if ($selectedSecondFishResultResult[$i]->status === 'yes') { // yes yes
+                            // sad ovde jos proveriti sa third fish - porediti i sa prvim i sa drugim.
+                            $statusAfterCheckFirstAndThird = null;
+                            for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
+                                if ($selectedThirdFishResultResult[$j]->second_fish_id === $print->second_fish_id) { // ovde proveravamo prvu i trecu
+                                    if ($selectedThirdFishResultResult[$j]->status === 'yes') { // yes yes yes
+                                        $statusAfterCheckFirstAndThird = 'yes';
+                                        break;
+//                                        $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name);
+                                    }
+                                    if ($selectedThirdFishResultResult[$j]->status === 'no') { // yes yes no
+                                        $statusAfterCheckFirstAndThird = 'no';
+                                        $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+                                        break;
+                                    }
+                                    if ($selectedThirdFishResultResult[$j]->status === 'caution') { // yes yes caution
+                                        $statusAfterCheckFirstAndThird = 'caution';
+                                        break;
+//                                        $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
+                                    }
+                                }
+                            }
+                            $statusAfterCheckSecondAndThird = null;
+                            if ($statusAfterCheckFirstAndThird === 'yes' || $statusAfterCheckFirstAndThird === 'caution'){
+                                for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
+                                    if ($selectedThirdFishResultResult[$j]->second_fish_id === $selectedSecondFishResultResult[$i]->fish_id) { // ovde proveravamo drugu i trecu
+                                        if ($selectedThirdFishResultResult[$j]->status === 'yes') { // yes yes yes
+                                            $statusAfterCheckSecondAndThird = 'yes';
+                                            break;
+                                        }
+                                        if ($selectedThirdFishResultResult[$j]->status === 'no') { // yes yes no
+                                            $statusAfterCheckSecondAndThird = 'no';
+                                            $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+                                            break;
+                                        }
+                                        if ($selectedThirdFishResultResult[$j]->status === 'caution') { // yes yes caution
+                                            $statusAfterCheckSecondAndThird = 'caution';
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if ($statusAfterCheckSecondAndThird !== 'no' && $statusAfterCheckFirstAndThird !== 'no') {
+                                if ($statusAfterCheckSecondAndThird === 'yes' && $statusAfterCheckFirstAndThird === 'yes') {
+                                    $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name);
+                                }
+                                if ($statusAfterCheckSecondAndThird === 'yes' && $statusAfterCheckFirstAndThird === 'caution') {
+                                    $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
+                                }
+                                if ($statusAfterCheckSecondAndThird === 'caution' && $statusAfterCheckFirstAndThird === 'yes') {
+                                    $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
+                                }
+                                if ($statusAfterCheckSecondAndThird === 'caution' && $statusAfterCheckFirstAndThird === 'caution') {
+                                    $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
+                                }
+
+                            }
+                            if ($statusAfterCheckSecondAndThird) {
+                                break;
+                            }
                         } else if ($selectedSecondFishResultResult[$i]->status === 'no') {
+                            // Ako je ovde no, svakako je no i nema dalje
                             $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
                             break;
                         } else if ($selectedSecondFishResultResult[$i]->status === 'caution') {
+                            // ako je caution, proveravamo dalje za third - porediti i sa prvim i drugim
+                            // CAUTION START
+
+                            $statusAfterCheckFirstAndThird = null;
+                            for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
+                                if ($selectedThirdFishResultResult[$j]->second_fish_id === $print->second_fish_id) { // ovde proveravamo prvu i trecu
+                                    if ($selectedThirdFishResultResult[$j]->status === 'yes') { // caution yes yes
+                                        $statusAfterCheckFirstAndThird = 'caution';
+                                        break;
+                                    }
+                                    if ($selectedThirdFishResultResult[$j]->status === 'no') { // caution yes no
+                                        $statusAfterCheckFirstAndThird = 'no';
+                                        $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+                                        break;
+                                    }
+                                    if ($selectedThirdFishResultResult[$j]->status === 'caution') { // caution yes caution
+                                        $statusAfterCheckFirstAndThird = 'caution';
+                                    }
+                                }
+                            }
+                            $statusAfterCheckSecondAndThird = null;
+                            if ($statusAfterCheckFirstAndThird === 'caution'){
+                                for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
+                                    if ($selectedThirdFishResultResult[$j]->second_fish_id === $selectedSecondFishResultResult[$i]->fish_id) { // ovde proveravamo drugu i trecu
+                                        if ($selectedThirdFishResultResult[$j]->status === 'yes') { // caution yes yes
+                                            $statusAfterCheckSecondAndThird = 'caution';
+                                            break;
+                                        }
+                                        if ($selectedThirdFishResultResult[$j]->status === 'no') { // yes yes no
+                                            $statusAfterCheckSecondAndThird = 'no';
+                                            $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+                                            break;
+                                        }
+                                        if ($selectedThirdFishResultResult[$j]->status === 'caution') { // caution yes caution
+                                            $statusAfterCheckSecondAndThird = 'caution';
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if ($statusAfterCheckSecondAndThird !== 'no' && $statusAfterCheckFirstAndThird !== 'no') {
+                                $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
+                            }
+                            if ($statusAfterCheckSecondAndThird) {
+                                break;
+                            }
+
+                            // CAUTION END
+
                             $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name);
                         }
                     } else if ($print->status === 'no' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
+                        // ako je no to svakako vazi za trecu, nema sta da je gledamo uopste
                         $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
                         break;
                     } else if ($print->status === 'caution' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
                         if ($selectedSecondFishResultResult[$i]->status === 'yes') {
-                            $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
+                            // ako je caution i yes proveravamo sa prvom i drugom za trecu
+
+
+                            // CAUTION YES START
+
+                            $statusAfterCheckFirstAndThird = null;
+                            for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
+                                if ($selectedThirdFishResultResult[$j]->second_fish_id === $print->second_fish_id) { // ovde proveravamo prvu i trecu
+                                    if ($selectedThirdFishResultResult[$j]->status === 'yes') { // caution yes yes
+                                        $statusAfterCheckFirstAndThird = 'caution';
+                                        break;
+                                    }
+                                    if ($selectedThirdFishResultResult[$j]->status === 'no') { // caution yes no
+                                        $statusAfterCheckFirstAndThird = 'no';
+                                        $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+                                        break;
+                                    }
+                                    if ($selectedThirdFishResultResult[$j]->status === 'caution') { // caution yes caution
+                                        $statusAfterCheckFirstAndThird = 'caution';
+                                    }
+                                }
+                            }
+                            $statusAfterCheckSecondAndThird = null;
+                            if ($statusAfterCheckFirstAndThird === 'caution'){
+                                for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
+                                    if ($selectedThirdFishResultResult[$j]->second_fish_id === $selectedSecondFishResultResult[$i]->fish_id) { // ovde proveravamo drugu i trecu
+                                        if ($selectedThirdFishResultResult[$j]->status === 'yes') { // caution yes yes
+                                            $statusAfterCheckSecondAndThird = 'caution';
+                                            break;
+                                        }
+                                        if ($selectedThirdFishResultResult[$j]->status === 'no') { // caution yes no
+                                            $statusAfterCheckSecondAndThird = 'no';
+                                            $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+                                            break;
+                                        }
+                                        if ($selectedThirdFishResultResult[$j]->status === 'caution') { // caution yes caution
+                                            $statusAfterCheckSecondAndThird = 'caution';
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if ($statusAfterCheckSecondAndThird !== 'no' && $statusAfterCheckFirstAndThird !== 'no') {
+                                $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
+                            }
+                            if ($statusAfterCheckSecondAndThird) {
+                                break;
+                            }
+
+                            // CAUTION YES END
+
+//                            $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
                             break;
                         } else if ($selectedSecondFishResultResult[$i]->status === 'no') {
+                            // no je no do kraja
                             $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
                             break;
                         } else if ($selectedSecondFishResultResult[$i]->status === 'caution') {
-                            $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name);
+                            // i ovde proveravamo
+                            // CAUTION YES START
+
+                            $statusAfterCheckFirstAndThird = null;
+                            for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
+                                if ($selectedThirdFishResultResult[$j]->second_fish_id === $print->second_fish_id) { // ovde proveravamo prvu i trecu
+                                    if ($selectedThirdFishResultResult[$j]->status === 'yes') { // caution caution yes
+                                        $statusAfterCheckFirstAndThird = 'caution';
+                                        break;
+                                    }
+                                    if ($selectedThirdFishResultResult[$j]->status === 'no') { // caution caution no
+                                        $statusAfterCheckFirstAndThird = 'no';
+                                        $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+                                        break;
+                                    }
+                                    if ($selectedThirdFishResultResult[$j]->status === 'caution') { // caution caution caution
+                                        $statusAfterCheckFirstAndThird = 'caution';
+                                    }
+                                }
+                            }
+                            $statusAfterCheckSecondAndThird = null;
+                            if ($statusAfterCheckFirstAndThird === 'caution'){
+                                for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
+                                    if ($selectedThirdFishResultResult[$j]->second_fish_id === $selectedSecondFishResultResult[$i]->fish_id) { // ovde proveravamo drugu i trecu
+                                        if ($selectedThirdFishResultResult[$j]->status === 'yes') { // caution caution yes
+                                            $statusAfterCheckSecondAndThird = 'caution';
+                                            break;
+                                        }
+                                        if ($selectedThirdFishResultResult[$j]->status === 'no') { // caution caution no
+                                            $statusAfterCheckSecondAndThird = 'no';
+                                            $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+                                            break;
+                                        }
+                                        if ($selectedThirdFishResultResult[$j]->status === 'caution') { // caution caution caution
+                                            $statusAfterCheckSecondAndThird = 'caution';
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if ($statusAfterCheckSecondAndThird !== 'no' && $statusAfterCheckFirstAndThird !== 'no') {
+                                $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
+                            }
+                            if ($statusAfterCheckSecondAndThird) {
+                                break;
+                            }
+//                            $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name);
                         }
                     }
                 }
