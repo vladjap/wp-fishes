@@ -95,6 +95,36 @@ class Fishmap_Shortcode {
         ";
     }
 
+    private function getRelationRule($arrayToSearch, $secondFishId) {
+        $rule = 'yes';
+        for($i = 0; $i < count($arrayToSearch); $i++) {
+            if ($arrayToSearch[$i]->second_fish_id === $secondFishId) {
+                $rule = $arrayToSearch[$i]->status;
+                break;
+            }
+        }
+        return $rule;
+    }
+    private function groupRules($arrayOfRules = []) {
+        $isNo = false;
+        $isCaution = false;
+        for($i = 0; $i < count($arrayOfRules); $i++) {
+            if ($arrayOfRules[$i] === 'no') {
+                $isNo = true;
+                break;
+            }
+            if ($arrayOfRules[$i] === 'caution') {
+                $isCaution = true;
+            }
+        }
+        if ($isNo) {
+            return 'no';
+        }
+        if ($isCaution) {
+            return 'caution';
+        }
+        return 'yes';
+    }
     private function isAllIncompatible($selectedFirstFishResultResult, $selectedSecondFishResultResult, $selectedThirdFishResultResult = null) {
         if ($selectedThirdFishResultResult) {
             for($j = 0; $j < count($selectedFirstFishResultResult); $j++ ) {
@@ -243,236 +273,45 @@ class Fishmap_Shortcode {
         // kada u pricu udje treca riba, poredi se sa prve 2 i jedno ne je ne.
         // Jedno mozda i jedno da su mozda.
         // Mozda i ne su ne
-        $isAllIncompatible = $this->isAllIncompatible($selectedFirstFishResultResult, $selectedSecondFishResultResult, $selectedThirdFishResultResult);
+//        $isAllIncompatible = $this->isAllIncompatible($selectedFirstFishResultResult, $selectedSecondFishResultResult, $selectedThirdFishResultResult);
+
+        $firstAndSecond = Fishmap_DB::getRelationByIds($selectValue, $secondSelectValue);
+        if ($firstAndSecond) {
+            $firstAndSecond = $firstAndSecond[0];
+        }
+        $firstAndThird = Fishmap_DB::getRelationByIds($selectValue, $thirdSelectValue);
+        if ($firstAndThird) {
+            $firstAndThird = $firstAndThird[0];
+        }
+        $secondAndThird = Fishmap_DB::getRelationByIds($secondSelectValue, $thirdSelectValue);
+        if ($secondAndThird) {
+            $secondAndThird = $secondAndThird[0];
+        }
+        $ruleGroupedForSelected = $this->groupRules([$firstAndSecond->status, $firstAndThird->status, $secondAndThird->status]);
+
         foreach ($selectedFirstFishResultResult as $print) {
-            if ($print->status === 'no' || $isAllIncompatible) {
+            if ($print->status === 'no' || $ruleGroupedForSelected === 'no') {
                 $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
             }
-            if ($print->status !== 'no' && !$isAllIncompatible) {
-                for ($i = 0; $i < count($selectedSecondFishResultResult); $i++) {
-                    if ($print->status === 'yes' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) { // ovde proveravamo prvu i drugu
-                        if ($selectedSecondFishResultResult[$i]->status === 'yes') { // yes yes
-                            // sad ovde jos proveriti sa third fish - porediti i sa prvim i sa drugim.
-                            $statusAfterCheckFirstAndThird = null; // ovde cemo da upisemo rezultat kombinacije prva - treca
-                            // ovde krecemo da vrtimo treci da ga poredimo sa prvim
-                            for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
-                                if ($selectedThirdFishResultResult[$j]->second_fish_id === $print->second_fish_id) { // ovde proveravamo da li je to bas ta sto nam treba
-                                    if ($selectedThirdFishResultResult[$j]->status === 'yes') { // yes yes yes - za prvu i trecu
-                                        $statusAfterCheckFirstAndThird = 'yes';
-                                        break;
-                                    }
-                                    if ($selectedThirdFishResultResult[$j]->status === 'no') { // yes yes no - za prvu i trecu
-                                        $statusAfterCheckFirstAndThird = 'no';
-                                        $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
-                                        break;
-                                    }
-                                    if ($selectedThirdFishResultResult[$j]->status === 'caution') { // yes yes caution - za prvu i trecu
-                                        $statusAfterCheckFirstAndThird = 'caution';
-                                        break;
-                                    }
-                                }
-                            }
-                            $statusAfterCheckSecondAndThird = null; // ovde cemo da upisemo rezultat kombinacije druga - treca
-                            // ovde krecemo da vrtimo treci da ga poredimo sa drugim, ali samo ako nije NO kombinacija prvog i treceg
-                            if ($statusAfterCheckFirstAndThird === 'yes' || $statusAfterCheckFirstAndThird === 'caution') {
-                                for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
-                                    if ($selectedThirdFishResultResult[$j]->second_fish_id === $selectedSecondFishResultResult[$i]->fish_id) { // ovde proveravamo drugu i trecu
-                                        if ($selectedThirdFishResultResult[$j]->status === 'yes') { // yes yes yes - za drugu i trecu
-                                            $statusAfterCheckSecondAndThird = 'yes';
-                                            break;
-                                        }
-                                        if ($selectedThirdFishResultResult[$j]->status === 'no') { // yes yes no - za drugu i trecu
-                                            $statusAfterCheckSecondAndThird = 'no';
-                                            $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
-                                            break;
-                                        }
-                                        if ($selectedThirdFishResultResult[$j]->status === 'caution') { // yes yes caution - za drugu i trecu
-                                            $statusAfterCheckSecondAndThird = 'caution';
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            // Ovde je krajnja provera. Sada imamo informacije o svim kombinacijama:
-                            // Prva i druga znamo da su YES, pa ispitujemo dalje:
-                            if ($statusAfterCheckSecondAndThird !== 'no' && $statusAfterCheckFirstAndThird !== 'no') { // ako su oba statusa NO, vec smo ga dodali u tabelu ranije i ne trebamo sad nista
-                                if ($statusAfterCheckSecondAndThird === 'yes' && $statusAfterCheckFirstAndThird === 'yes') { // YES YES YES - prvi i drugi YES, prvi i treci YES, drugi i treci YES
-                                    $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name);
-                                }
-                                if ($statusAfterCheckSecondAndThird === 'yes' && $statusAfterCheckFirstAndThird === 'caution') { // YES CAUTION YES - prvi i drugi YES, prvi i treci CAUTION, drugi i treci YES
-                                    $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
-                                }
-                                if ($statusAfterCheckSecondAndThird === 'caution' && $statusAfterCheckFirstAndThird === 'yes') { // YES YES CAUTION - prvi i drugi YES, prvi i treci YES, drugi i treci CAUTION
-                                    $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
-                                }
-                                if ($statusAfterCheckSecondAndThird === 'caution' && $statusAfterCheckFirstAndThird === 'caution') { // YES CAUTION CAUTION - prvi i drugi YES, prvi i treci CAUTION, drugi i treci CAUTION
-                                    $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
-                                }
+            if ($print->status !== 'no' && $ruleGroupedForSelected !== 'no') {
 
-                            }
-                            if ($statusAfterCheckSecondAndThird) {
-                                break;
-                            }
-                        } else if ($selectedSecondFishResultResult[$i]->status === 'no') {
-                            // Ako je ovde no, svakako je no i nema dalje
-                            $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
-                            break;
-                        } else if ($selectedSecondFishResultResult[$i]->status === 'caution') {
-                            // ako je caution prvi i drugi, proveravamo dalje za third
-                            $statusAfterCheckFirstAndThird = null; // ovde cemo da upisemo rezultat kombinacije prva - treca
-                            for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
-                                if ($selectedThirdFishResultResult[$j]->second_fish_id === $print->second_fish_id) { // ovde proveravamo da li je to bas ta sto nam treba
-                                    if ($selectedThirdFishResultResult[$j]->status === 'yes') { // yes caution yes - za prvu i trecu
-                                        $statusAfterCheckFirstAndThird = 'caution';
-                                        break;
-                                    }
-                                    if ($selectedThirdFishResultResult[$j]->status === 'no') { // yes caution no - za prvu i trecu
-                                        $statusAfterCheckFirstAndThird = 'no';
-                                        $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
-                                        break;
-                                    }
-                                    if ($selectedThirdFishResultResult[$j]->status === 'caution') { // yes caution caution - za prvu i trecu
-                                        $statusAfterCheckFirstAndThird = 'caution';
-                                    }
-                                }
-                            }
-                            $statusAfterCheckSecondAndThird = null; // ovde cemo da upisemo rezultat kombinacije druga - treca
-                            // ovde krecemo da vrtimo treci da ga poredimo sa drugim, ali samo ako je caution kombinacija prvog i treceg. No je resen iznad, a YES nemamo nikad jer je prvi i drugi CAUTION. Pa ce svaki YES od pre biti CAUTION
-                            if ($statusAfterCheckFirstAndThird === 'caution'){
-                                for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
-                                    if ($selectedThirdFishResultResult[$j]->second_fish_id === $selectedSecondFishResultResult[$i]->fish_id) { // ovde proveravamo da li je to bas ta sto nam treba
-                                        if ($selectedThirdFishResultResult[$j]->status === 'yes') { // yes caution yes - za drugu i trecu
-                                            $statusAfterCheckSecondAndThird = 'caution';
-                                            break;
-                                        }
-                                        if ($selectedThirdFishResultResult[$j]->status === 'no') { // yes caution no - za drugu i trecu
-                                            $statusAfterCheckSecondAndThird = 'no';
-                                            $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
-                                            break;
-                                        }
-                                        if ($selectedThirdFishResultResult[$j]->status === 'caution') { // yes caution caution - za drugu i trecu
-                                            $statusAfterCheckSecondAndThird = 'caution';
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if ($statusAfterCheckSecondAndThird !== 'no' && $statusAfterCheckFirstAndThird !== 'no') {
-                                $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
-                            }
-                            if ($statusAfterCheckSecondAndThird) {
-                                break;
-                            }
-                            // CAUTION END
-                            $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name);
-                        }
-                    } else if ($print->status === 'no' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
-                        // ako je no to svakako vazi za trecu, nema sta da je gledamo uopste
-                        $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
-                        break;
-                    } else if ($print->status === 'caution' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
-                        if ($selectedSecondFishResultResult[$i]->status === 'yes') {
-                            // ako je caution i yes proveravamo sa prvom i drugom za trecu
-                            // CAUTION YES START
+                $withSecond  = $this->getRelationRule($selectedSecondFishResultResult, $print->second_fish_id);
+                $withThird  = $this->getRelationRule($selectedThirdFishResultResult, $print->second_fish_id);
 
-                            $statusAfterCheckFirstAndThird = null;
-                            for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
-                                if ($selectedThirdFishResultResult[$j]->second_fish_id === $print->second_fish_id) { // ovde proveravamo prvu i trecu
-                                    if ($selectedThirdFishResultResult[$j]->status === 'yes') { // caution yes yes
-                                        $statusAfterCheckFirstAndThird = 'caution';
-                                        break;
-                                    }
-                                    if ($selectedThirdFishResultResult[$j]->status === 'no') { // caution yes no
-                                        $statusAfterCheckFirstAndThird = 'no';
-                                        $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
-                                        break;
-                                    }
-                                    if ($selectedThirdFishResultResult[$j]->status === 'caution') { // caution yes caution
-                                        $statusAfterCheckFirstAndThird = 'caution';
-                                    }
-                                }
-                            }
-                            $statusAfterCheckSecondAndThird = null;
-                            if ($statusAfterCheckFirstAndThird === 'caution'){
-                                for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
-                                    if ($selectedThirdFishResultResult[$j]->second_fish_id === $selectedSecondFishResultResult[$i]->fish_id) { // ovde proveravamo drugu i trecu
-                                        if ($selectedThirdFishResultResult[$j]->status === 'yes') { // caution yes yes
-                                            $statusAfterCheckSecondAndThird = 'caution';
-                                            break;
-                                        }
-                                        if ($selectedThirdFishResultResult[$j]->status === 'no') { // caution yes no
-                                            $statusAfterCheckSecondAndThird = 'no';
-                                            $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
-                                            break;
-                                        }
-                                        if ($selectedThirdFishResultResult[$j]->status === 'caution') { // caution yes caution
-                                            $statusAfterCheckSecondAndThird = 'caution';
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if ($statusAfterCheckSecondAndThird !== 'no' && $statusAfterCheckFirstAndThird !== 'no') {
-                                $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
-                            }
-                            if ($statusAfterCheckSecondAndThird) {
-                                break;
-                            }
-                            break;
-                        } else if ($selectedSecondFishResultResult[$i]->status === 'no') {
-                            // no je no do kraja
-                            $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
-                            break;
-                        } else if ($selectedSecondFishResultResult[$i]->status === 'caution') {
-                            $statusAfterCheckFirstAndThird = null;
-                            for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
-                                if ($selectedThirdFishResultResult[$j]->second_fish_id === $print->second_fish_id) { // ovde proveravamo prvu i trecu
-                                    if ($selectedThirdFishResultResult[$j]->status === 'yes') { // caution caution yes
-                                        $statusAfterCheckFirstAndThird = 'caution';
-                                        break;
-                                    }
-                                    if ($selectedThirdFishResultResult[$j]->status === 'no') { // caution caution no
-                                        $statusAfterCheckFirstAndThird = 'no';
-                                        $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
-                                        break;
-                                    }
-                                    if ($selectedThirdFishResultResult[$j]->status === 'caution') { // caution caution caution
-                                        $statusAfterCheckFirstAndThird = 'caution';
-                                    }
-                                }
-                            }
-                            $statusAfterCheckSecondAndThird = null;
-                            if ($statusAfterCheckFirstAndThird === 'caution'){
-                                for ($j = 0; $j < count($selectedThirdFishResultResult); $j++) {
-                                    if ($selectedThirdFishResultResult[$j]->second_fish_id === $selectedSecondFishResultResult[$i]->fish_id) { // ovde proveravamo drugu i trecu
-                                        if ($selectedThirdFishResultResult[$j]->status === 'yes') { // caution caution yes
-                                            $statusAfterCheckSecondAndThird = 'caution';
-                                            break;
-                                        }
-                                        if ($selectedThirdFishResultResult[$j]->status === 'no') { // caution caution no
-                                            $statusAfterCheckSecondAndThird = 'no';
-                                            $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
-                                            break;
-                                        }
-                                        if ($selectedThirdFishResultResult[$j]->status === 'caution') { // caution caution caution
-                                            $statusAfterCheckSecondAndThird = 'caution';
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if ($statusAfterCheckSecondAndThird !== 'no' && $statusAfterCheckFirstAndThird !== 'no') {
-                                $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
-                            }
-                            if ($statusAfterCheckSecondAndThird) {
-                                break;
-                            }
-                        }
-                    }
+                $groupRule = $this->groupRules([
+                    $print->status, $withSecond, $withThird,
+                ]);
+                if ($groupRule === 'yes') {
+                    $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name);
+                }
+                if ($groupRule === 'no') {
+                    $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
+                }
+                if ($groupRule === 'caution') {
+                    $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name);
                 }
             }
         }
-
         $selectedFirstFishHtml = $this->createSelectedFishHtml($selectedFirstFish);
         $selectedSecondFishHtml = $this->createSelectedFishHtml($selectedSecondFish);
         $selectedThirdFishHtml = $this->createSelectedFishHtml($selectedThirdFish);
