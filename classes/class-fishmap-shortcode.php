@@ -46,14 +46,31 @@ class Fishmap_Shortcode {
         }
         $tankWarningHTML = '';
         if ($tankWarning) {
-            $tankWarningHTML = "<div class='fishmap-selected-fish-tank-warning'>Warning for tank</div>";
+            $tankWarningHTML = "<div class='fishmap-selected-fish-tank-warning'>Tank volume warning message</div>";
+        }
+        $shortDescHTML = '';
+        if ($selectedFish->short_description) {
+            $shortDescHTML = "<p class='fishmap-selected-fish-box-item'>$selectedFish->short_description</p>";
+        }
+        $minTankVolHTML = '';
+        if ($selectedFish->minimum_tank_volume) {
+            $minTankVolHTML = "<div class='fishmap-selected-fish-box-item'>Min tank volume: $selectedFish->minimum_tank_volume gallons</div>";
+        }
+        $requiredTankVolHTML = '';
+        if ($selectedFish->required_tank_volume) {
+            $requiredTankVolHTML = "<div class='fishmap-selected-fish-box-item'>Required tank volume: $selectedFish->required_tank_volume gallons</div>";
+        }
+        $mostCommonTankVolHTML = '';
+        if ($selectedFish->most_common_tank_volume) {
+            $mostCommonTankVolHTML = "<div class='fishmap-selected-fish-box-item'>Most common tank volume: $selectedFish->most_common_tank_volume gallons</div>";
         }
         return "
         <div class='fishmap-selected-fish-box'>
-            <div class='fishmap-selected-fish-box-item'>name: $selectedFish->name</div>
-            <div class='fishmap-selected-fish-box-item'>short_description: $selectedFish->short_description</div>
-            <div class='fishmap-selected-fish-box-item'>minimum_volume: $selectedFish->minimum_volume</div>
-            <div class='fishmap-selected-fish-box-item'>largest_minimum_volume: $selectedFish->largest_minimum_volume</div>
+            <h3>$selectedFish->name</h3>
+            $shortDescHTML
+            $minTankVolHTML
+            $requiredTankVolHTML
+            $mostCommonTankVolHTML
             $tankWarningHTML
         </div>
         ";
@@ -63,9 +80,11 @@ class Fishmap_Shortcode {
         return "
         <div class='fishmap-rule-table-wrapper fishmap-rule-table-wrapper-$rule'>
             <table class='fishmap-rule-tables-table'>
-              <tr>
-                <th>$thTitle</th>
-              </tr>
+              <thead>
+                  <tr>
+                    <th>$thTitle</th>
+                  </tr>
+              </thead>
               $fishsTRTagsHtml
             </table>
         </div>
@@ -99,7 +118,6 @@ class Fishmap_Shortcode {
 
         return  "
             <div class='fishmap-selected-first-fish'>
-                <h3>Selected fish</h3>
                 $selectedFishHtml
             </div>
             <div class='fishmap-rule-tables-wrapper'>
@@ -242,11 +260,9 @@ class Fishmap_Shortcode {
         return  "
             <div class='fishmap-selected-fishes-wrapper'>
                 <div class='fishmap-selected-first-fish'>
-                    <h3>First selected fish</h3>
                     $selectedFirstFishHtml
                 </div>
                 <div class='fishmap-selected-second-fish'>
-                    <h3>Second selected fish</h3>
                     $selectedSecondFishHtml
                 </div>
             </div>
@@ -347,7 +363,7 @@ class Fishmap_Shortcode {
             return $item1['tankWarning'] < $item2['tankWarning'] ? -1 : 1;
         });
         for($i = 0; $i < count($compArr); $i++) {
-            $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $cautionArr[$i]['fish_name'], $cautionArr[$i]['tankWarning']);
+            $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $compArr[$i]['fish_name'], $compArr[$i]['tankWarning']);
         }
         for($i = 0; $i < count($cautionArr); $i++) {
             $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $cautionArr[$i]['fish_name'], $cautionArr[$i]['tankWarning']);
@@ -366,15 +382,12 @@ class Fishmap_Shortcode {
         return  "
             <div class='fishmap-selected-fishes-wrapper'>
                 <div class='fishmap-selected-first-fish'>
-                    <h3>First selected fish</h3>
                     $selectedFirstFishHtml
                 </div>
                 <div class='fishmap-selected-second-fish'>
-                    <h3>Second selected fish</h3>
                     $selectedSecondFishHtml
                 </div>
                 <div class='fishmap-selected-second-fish'>
-                    <h3>Third selected fish</h3>
                     $selectedThirdFishHtml
                 </div>
             </div>
