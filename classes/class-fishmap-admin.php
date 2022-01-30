@@ -30,6 +30,148 @@ class Fishmap_Admin {
     public function addAdminPageContent() {
         add_menu_page('Fish map', 'Fish map', 'manage_options' ,__FILE__, [$this, 'fishesAdminPage'], 'dashicons-palmtree');
         add_submenu_page( __FILE__, 'Fish relations', 'Fish relations', 'manage_options', 'fish-relations', [$this, 'fishRelationsPage']);
+        add_submenu_page( __FILE__, 'Fish settings', 'Fish settings', 'manage_options', 'fish-settings', [$this, 'fishSettingsPage']);
+    }
+
+    public function fishSettingsPage() {
+        if (isset($_POST['fish-tank-warning-message-submit'])) {
+            update_option('fish_tank_warning_message', $_POST['fish-tank-warning-message']);
+        }
+        // TABLE
+        if (isset($_POST['fishmap-table-header-text-compatible-submit'])) {
+            update_option('fishmap_table_header_text_compatible', $_POST['fishmap-table-header-text-compatible']);
+        }
+        if (isset($_POST['fishmap-table-header-text-incompatible-submit'])) {
+            update_option('fishmap_table_header_text_incompatible', $_POST['fishmap-table-header-text-incompatible']);
+        }
+        if (isset($_POST['fishmap-table-header-text-caution-submit'])) {
+            update_option('fishmap_table_header_text_caution', $_POST['fishmap-table-header-text-caution']);
+        }
+        // SELECTED FISH
+        if (isset($_POST['fishmap-selected-fish-min-tank-volume-label-submit'])) {
+            update_option('fishmap_selected_fish_min_tank_volume', $_POST['fishmap-selected-fish-min-tank-volume-label']);
+        }
+        if (isset($_POST['fishmap-selected-fish-largest-required-min-tank-volume-label-submit'])) {
+            update_option('fishmap_selected_fish_largest_required_min_tank_volume', $_POST['fishmap-selected-fish-largest-required-min-tank-volume-label']);
+        }
+        if (isset($_POST['fishmap-selected-fish-min-most-common-tank-volume-label-submit'])) {
+            update_option('fishmap_selected_fish_min_most_common_tank_volume', $_POST['fishmap-selected-fish-min-most-common-tank-volume-label']);
+        }
+
+        ?>
+            <h1>Fishmap plugin settings</h1>
+        <?php
+        $this->createFishTankWarningMessageForm();
+        $this->createTableHeaderTextForms();
+        $this->createSelectedFishLabelForms();
+    }
+
+    private function createFishTankWarningMessageForm() {
+        $fishTankWarningMessageFromStore = get_option( 'fish_tank_warning_message' );
+        if (!$fishTankWarningMessageFromStore) {
+            update_option('fish_tank_warning_message', 'Warning for fish tank size');
+        }
+        ?>
+        <div class="fishmap-fish-tank-warning-message-form-wrapper">
+            <form class="fishmap-fish-tank-warning-message-form" method="post" action="">
+                <label class="fishmap-label-settings">
+                    <span class="fishmap-settings-labels-label">Fish tank warning message:</span>
+                    <input type="text" name="fish-tank-warning-message" value="<?php echo $fishTankWarningMessageFromStore ?>">
+                </label>
+                <input type="submit" name="fish-tank-warning-message-submit">
+            </form>
+        </div>
+        <?php
+    }
+    private function createSelectedFishLabelForms() {
+        $selectedFishMinTankVolumeLabelFromStore = get_option( 'fishmap_selected_fish_min_tank_volume' );
+        if (!$selectedFishMinTankVolumeLabelFromStore) {
+            update_option('fishmap_selected_fish_min_tank_volume', 'Smallest Minimum volume by any member:');
+        }
+        $selectedFishLargestRequiredMinTankVolumeLabelFromStore = get_option( 'fishmap_selected_fish_largest_required_min_tank_volume' );
+        if (!$selectedFishLargestRequiredMinTankVolumeLabelFromStore) {
+            update_option('fishmap_selected_fish_largest_required_min_tank_volume', 'Largest required minimum volume by any member:');
+        }
+        $selectedFishMinMostCommonTankVolumeLabelFromStore = get_option( 'fishmap_selected_fish_min_most_common_tank_volume' );
+        if (!$selectedFishMinMostCommonTankVolumeLabelFromStore) {
+            update_option('fishmap_selected_fish_min_most_common_tank_volume', 'Minimum volume most common for the group:');
+        }
+        ?>
+        <h2>Selected fish labels:</h2>
+        <div class="fishmap-selected-fish-labels-form-wrapper">
+            <form class="fishmap-selected-fish-min-tank-volume-label-form" method="post" action="">
+                <label class="fishmap-label-settings">
+                    <span class="fishmap-selected-fish-label">Smallest Minimum volume by any member</span>
+                    <input type="text" name="fishmap-selected-fish-min-tank-volume-label" value="<?php echo $selectedFishMinTankVolumeLabelFromStore ?>">
+                </label>
+                <input type="submit" name="fishmap-selected-fish-min-tank-volume-label-submit">
+            </form>
+        </div>
+        <div class="fishmap-selected-fish-labels-form-wrapper">
+            <form class="fishmap-selected-fish-largest-required-min-tank-volume-label-form" method="post" action="">
+                <label class="fishmap-label-settings">
+                    <span class="fishmap-selected-fish-label">Largest required minimum volume by any member</span>
+                    <input type="text" name="fishmap-selected-fish-largest-required-min-tank-volume-label" value="<?php echo $selectedFishLargestRequiredMinTankVolumeLabelFromStore ?>">
+                </label>
+                <input type="submit" name="fishmap-selected-fish-largest-required-min-tank-volume-label-submit">
+            </form>
+        </div>
+        <div class="fishmap-selected-fish-labels-form-wrapper">
+            <form class="fishmap-selected-fish-min-most-common-tank-volume-label-form" method="post" action="">
+                <label class="fishmap-label-settings">
+                    <span class="fishmap-selected-fish-label">Minimum volume most common for the group</span>
+                    <input type="text" name="fishmap-selected-fish-min-most-common-tank-volume-label" value="<?php echo $selectedFishMinMostCommonTankVolumeLabelFromStore ?>">
+                </label>
+                <input type="submit" name="fishmap-selected-fish-min-most-common-tank-volume-label-submit">
+            </form>
+        </div>
+
+        <?php
+    }
+
+    private function createTableHeaderTextForms() {
+        $tableHeaderTextCompatibleFromStore = get_option( 'fishmap_table_header_text_compatible' );
+        if (!$tableHeaderTextCompatibleFromStore) {
+            update_option('fishmap_table_header_text_compatible', 'Compatible with');
+        }
+        $tableHeaderTextIncompatibleFromStore = get_option( 'fishmap_table_header_text_incompatible' );
+        if (!$tableHeaderTextIncompatibleFromStore) {
+            update_option('fishmap_table_header_text_incompatible', 'Incompatible with');
+        }
+        $tableHeaderTextCautionFromStore = get_option( 'fishmap_table_header_text_caution' );
+        if (!$tableHeaderTextCautionFromStore) {
+            update_option('fishmap_table_header_text_caution', 'Caution');
+        }
+        ?>
+        <h2>Table header labels:</h2>
+        <div class="fishmap-table-header-text-form-wrapper">
+            <form class="fishmap-table-header-text-compatible-form" method="post" action="">
+                <label class="fishmap-label-settings">
+                    <span class="fishmap-settings-labels-label">Label for compatible</span>
+                    <input type="text" name="fishmap-table-header-text-compatible" value="<?php echo $tableHeaderTextCompatibleFromStore ?>">
+                </label>
+                <input type="submit" name="fishmap-table-header-text-compatible-submit">
+            </form>
+        </div>
+        <div class="fishmap-table-header-text-form-wrapper">
+            <form class="fishmap-table-header-text-incompatible-form" method="post" action="">
+                <label class="fishmap-label-settings">
+                    <span class="fishmap-settings-labels-label">Label for incompatible</span>
+                    <input type="text" name="fishmap-table-header-text-incompatible" value="<?php echo $tableHeaderTextIncompatibleFromStore ?>">
+                </label>
+                <input type="submit" name="fishmap-table-header-text-incompatible-submit">
+            </form>
+        </div>
+        <div class="fishmap-table-header-text-form-wrapper">
+            <form class="fishmap-table-header-text-caution-form" method="post" action="">
+                <label class="fishmap-label-settings">
+                    <span class="fishmap-settings-labels-label">Label for caution</span>
+                    <input type="text" name="fishmap-table-header-text-caution" value="<?php echo $tableHeaderTextCautionFromStore ?>">
+                </label>
+                <input type="submit" name="fishmap-table-header-text-caution-submit">
+            </form>
+        </div>
+        <?php
     }
 
     public function fishesAdminPage() {

@@ -54,3 +54,21 @@
 #fishmap-fish-table {
     margin-top: 10px;
 }
+
+.fishmap-settings-labels-label {
+    width: 200px;
+    display: inline-block;
+}
+.fishmap-label-settings input {
+    width: 350px;
+}
+.fishmap-table-header-text-form-wrapper {
+    margin-top: 10px;
+}
+.fishmap-selected-fish-labels-form-wrapper {
+    margin-top: 10px;
+}
+.fishmap-selected-fish-label {
+    width: 310px;
+    display: inline-block;
+}

@@ -25,10 +25,11 @@ class Fishmap_Shortcode {
     private function createRuleTableTR($rule, $text, $tankWarning = false) {
         $tankWarningHTML = '';
         $tankWarningCSSClass = '';
+        $warningMessageText = get_option( 'fish_tank_warning_message' );
         if ($tankWarning && $rule !== 'incompatible') {
             $tankWarningHTML = "
                 <div class='fishmap-tooltip'><span class='fishmap-tooltip-i'>i</span>
-                  <span class='fishmap-tooltiptext'>Tank volume warning message</span>
+                  <span class='fishmap-tooltiptext'>$warningMessageText</span>
                 </div>
             ";
             $tankWarningCSSClass = 'fishmap-rule-table-tr-tank-warning';
@@ -41,12 +42,13 @@ class Fishmap_Shortcode {
     }
 
     private function createSelectedFishHtml($selectedFish, $tankWarning) {
+        $warningMessageText = get_option( 'fish_tank_warning_message' );
         if (!$selectedFish) {
             return '';
         }
         $tankWarningHTML = '';
         if ($tankWarning) {
-            $tankWarningHTML = "<div class='fishmap-selected-fish-tank-warning'>Tank volume warning message</div>";
+            $tankWarningHTML = "<div class='fishmap-selected-fish-tank-warning'>$warningMessageText</div>";
         }
         $shortDescHTML = '';
         if ($selectedFish->short_description) {
@@ -54,15 +56,18 @@ class Fishmap_Shortcode {
         }
         $minTankVolHTML = '';
         if ($selectedFish->minimum_tank_volume) {
-            $minTankVolHTML = "<div class='fishmap-selected-fish-box-item'>Min tank volume: $selectedFish->minimum_tank_volume gallons</div>";
+            $minTankVolLabel = get_option('fishmap_selected_fish_min_tank_volume');
+            $minTankVolHTML = "<div class='fishmap-selected-fish-box-item'>$minTankVolLabel $selectedFish->minimum_tank_volume gallons</div>";
         }
         $requiredTankVolHTML = '';
         if ($selectedFish->required_tank_volume) {
-            $requiredTankVolHTML = "<div class='fishmap-selected-fish-box-item'>Required tank volume: $selectedFish->required_tank_volume gallons</div>";
+            $reqTankVolLabel = get_option('fishmap_selected_fish_largest_required_min_tank_volume');
+            $requiredTankVolHTML = "<div class='fishmap-selected-fish-box-item'>$reqTankVolLabel $selectedFish->required_tank_volume gallons</div>";
         }
         $mostCommonTankVolHTML = '';
         if ($selectedFish->most_common_tank_volume) {
-            $mostCommonTankVolHTML = "<div class='fishmap-selected-fish-box-item'>Most common tank volume: $selectedFish->most_common_tank_volume gallons</div>";
+            $mostCommonMinTankVolLabel = get_option('fishmap_selected_fish_min_most_common_tank_volume');
+            $mostCommonTankVolHTML = "<div class='fishmap-selected-fish-box-item'>$mostCommonMinTankVolLabel $selectedFish->most_common_tank_volume gallons</div>";
         }
         return "
         <div class='fishmap-selected-fish-box'>
@@ -112,9 +117,9 @@ class Fishmap_Shortcode {
         }
 
         $selectedFishHtml = $this->createSelectedFishHtml($selectedFish);
-        $compatibleRuleTable = $this->createRuleTable($compatibleFishsTRTagsHtmlFirstFish, 'Compatible with', 'compatible');
-        $incompatibleRuleTable = $this->createRuleTable($incompatibleFishsTRTagsHtmlFirstFish, 'Incompatible with', 'incompatible');
-        $maybeRuleTable = $this->createRuleTable($maybeFishesTRTagsHtmlFirstFish, 'Caution', 'caution');
+        $compatibleRuleTable = $this->createRuleTable($compatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_compatible'), 'compatible');
+        $incompatibleRuleTable = $this->createRuleTable($incompatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_incompatible'), 'incompatible');
+        $maybeRuleTable = $this->createRuleTable($maybeFishesTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_caution'), 'caution');
 
         return  "
             <div class='fishmap-selected-first-fish'>
@@ -253,9 +258,9 @@ class Fishmap_Shortcode {
 
         $selectedFirstFishHtml = $this->createSelectedFishHtml($selectedFirstFish);
         $selectedSecondFishHtml = $this->createSelectedFishHtml($selectedSecondFish);
-        $compatibleRuleTableFirstFish = $this->createRuleTable($compatibleFishsTRTagsHtmlFirstFish, 'Compatible with', 'compatible');
-        $incompatibleRuleTableFirstFish = $this->createRuleTable($incompatibleFishsTRTagsHtmlFirstFish, 'Incompatible with', 'incompatible');
-        $maybeRuleTableFirstFish = $this->createRuleTable($maybeFishesTRTagsHtmlFirstFish, 'Caution', 'caution');
+        $compatibleRuleTableFirstFish = $this->createRuleTable($compatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_compatible'), 'compatible');
+        $incompatibleRuleTableFirstFish = $this->createRuleTable($incompatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_incompatible'), 'incompatible');
+        $maybeRuleTableFirstFish = $this->createRuleTable($maybeFishesTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_caution'), 'caution');
 
         return  "
             <div class='fishmap-selected-fishes-wrapper'>
@@ -371,9 +376,9 @@ class Fishmap_Shortcode {
         $selectedFirstFishHtml = $this->createSelectedFishHtml($selectedFirstFish, $firstSelectedTankWarning);
         $selectedSecondFishHtml = $this->createSelectedFishHtml($selectedSecondFish, $secondSelectedTankWarning);
         $selectedThirdFishHtml = $this->createSelectedFishHtml($selectedThirdFish, $thirdSelectedTankWarning);
-        $compatibleRuleTableFirstFish = $this->createRuleTable($compatibleFishsTRTagsHtmlFirstFish, 'Compatible with', 'compatible');
-        $incompatibleRuleTableFirstFish = $this->createRuleTable($incompatibleFishsTRTagsHtmlFirstFish, 'Incompatible with', 'incompatible');
-        $maybeRuleTableFirstFish = $this->createRuleTable($maybeFishesTRTagsHtmlFirstFish, 'Caution', 'caution');
+        $compatibleRuleTableFirstFish = $this->createRuleTable($compatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_compatible'), 'compatible');
+        $incompatibleRuleTableFirstFish = $this->createRuleTable($incompatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_incompatible'), 'incompatible');
+        $maybeRuleTableFirstFish = $this->createRuleTable($maybeFishesTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_caution'), 'caution');
 
         $tankSelectedHTML = '';
         if ($tankSize) {
