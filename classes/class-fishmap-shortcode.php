@@ -382,7 +382,7 @@ class Fishmap_Shortcode {
 
         $tankSelectedHTML = '';
         if ($tankSize) {
-            $tankSelectedHTML = 'Selected tank size is: ' . $tankSize;
+//            $tankSelectedHTML = 'Selected tank size is: ' . $tankSize;
         }
         return  "
             <div class='fishmap-selected-fishes-wrapper'>

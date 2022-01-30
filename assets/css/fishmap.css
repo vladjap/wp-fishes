@@ -9,6 +9,7 @@
 }
 .fishmap-selected-fishes-wrapper {
     display: flex;
+    /*flex-wrap: wrap;*/
 }
 .fishmap-selected-second-fish {
     /*border: 1px solid gray;*/
@@ -23,6 +24,7 @@
     min-width: 260px;
     padding: 5px 10px;
     background: #d2d2fd;
+    max-width: 260px;
 }
 .fishmap-selected-first-fish h3, .fishmap-selected-second-fish h3 {
     /*border-bottom: 1px solid gray;*/
@@ -124,4 +126,31 @@
     border-bottom: 1px solid #babaf6;
     padding: 5px;
     line-height: 24px;
+}
+
+@media only screen and (max-width: 820px) {
+    .fishmap-selected-fishes-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+    .fishmap-selected-second-fish {
+        margin: 0;
+        margin-top: 20px;
+    }
+    .fishmap-selected-first-fish,
+    .fishmap-selected-second-fish {
+        min-width: 270px;
+        max-width: 270px;
+    }
+
+    .fishmap-sc-selects-wrapper {
+        flex-direction: column;
+    }
+    .not-first-select {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+    .fishmap-rule-tables-wrapper {
+        flex-direction: column;
+    }
 }
