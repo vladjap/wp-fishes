@@ -37,18 +37,20 @@ class Fishmap_Admin {
         if (isset($_POST['newsubmit'])) {
             $name = $_POST['newname'];
             $shortDescription = $_POST['newshort_description'];
-            $minimum_volume = $_POST['newminimum_volume'];
-            $largest_minimum_volume = $_POST['newlargest_minimum_volume'];
-            Fishmap_DB::insertNewFish($name, $shortDescription, $minimum_volume, $largest_minimum_volume);
+            $minimum_tank_volume = $_POST['newminimum_tank_volume'];
+            $required_tank_volume = $_POST['newrequired_tank_volume'];
+            $most_common_tank_volume = $_POST['newmost_common_tank_volume'];
+            Fishmap_DB::insertNewFish($name, $shortDescription, $minimum_tank_volume, $required_tank_volume, $most_common_tank_volume);
             echo "<script>location.replace('admin.php?page=" . __FILE__ . "');</script>";
         }
         if (isset($_POST['uptsubmit'])) {
             $id = $_POST['uptid'];
             $name = $_POST['uptname'];
             $shortDescription = $_POST['uptnewshort_description'];
-            $minimum_volume = $_POST['uptnewminimum_volume'];
-            $largest_minimum_volume = $_POST['uptnewlargest_minimum_volume'];
-            Fishmap_DB::updateFish($id, $name, $shortDescription, $minimum_volume, $largest_minimum_volume);
+            $minimum_tank_volume = $_POST['uptnewminimum_tank_volume'];
+            $required_tank_volume = $_POST['uptnewrequired_tank_volume'];
+            $most_common_tank_volume = $_POST['uptnewmost_common_tank_volume'];
+            Fishmap_DB::updateFish($id, $name, $shortDescription, $minimum_tank_volume, $required_tank_volume, $most_common_tank_volume);
             echo "<script>location.replace('admin.php?page=" . __FILE__ . "');</script>";
         }
         if (isset($_GET['del'])) {
@@ -63,8 +65,9 @@ class Fishmap_Admin {
                 <div class='fishmap-admin-add-fish-form-description'>*(This is for adding new fish)</div>
                 <div class="fishmap-add-new-fish-input-wrapper"><input type="text" id="newname" name="newname" placeholder="Name"></div>
                 <div class="fishmap-add-new-fish-input-wrapper"><input type="text" id="newshort_description" name="newshort_description" placeholder="Short description"></div>
-                <div class="fishmap-add-new-fish-input-wrapper"><input type="text" id="newminimum_volume" name="newminimum_volume" placeholder="Minimum volume"></div>
-                <div class="fishmap-add-new-fish-input-wrapper"><input type="text" id="newlargest_minimum_volume" name="newlargest_minimum_volume" placeholder="Largest minimum volume"></div>
+                <div class="fishmap-add-new-fish-input-wrapper"><input type="number" id="newminimum_tank_volume" name="newminimum_tank_volume" placeholder="Minimum tank volume"></div>
+                <div class="fishmap-add-new-fish-input-wrapper"><input type="number" id="newrequired_tank_volume" name="newrequired_tank_volume" placeholder="Required tank volume"></div>
+                <div class="fishmap-add-new-fish-input-wrapper"><input type="number" id="newmost_common_tank_volume" name="newmost_common_tank_volume" placeholder="Most common tank volume"></div>
                 <div class="fishmap-add-new-fish-input-wrapper"><button id="newsubmit" name="newsubmit" type="submit">INSERT</button></div>
             </form>
 
@@ -77,32 +80,34 @@ class Fishmap_Admin {
                 foreach($result as $print) {
                     $name = $print->name;
                     $shortDescription = $print->short_description;
-                    $minimum_volume = $print->minimum_volume;
-                    $largest_minimum_volume = $print->largest_minimum_volume;
-                }
+                    $minimum_tank_volume = $print->minimum_tank_volume;
+                    $required_tank_volume = $print->required_tank_volume;
+                    $most_common_tank_volume = $print->most_common_tank_volume;}
                 echo "
         <h2>Update fish</h2>
         <div class='update-form-description'>*(Update selected fish)</div>
         <table class='wp-list-table widefat striped fishmap-admin-update-fish-form-table'>
           <thead>
             <tr>
-              <th width='25%'>Fish ID</th>
-              <th width='25%'>Name</th>
-              <th width='25%'>Short description</th>
-              <th width='25%'>Minimum volume</th>
-              <th width='25%'>Largest minimum volume</th>
-              <th width='25%'>Actions</th>
+              <th>Fish ID</th>
+              <th>Name</th>
+              <th>Short description</th>
+              <th >Minimum tank volume</th>
+              <th >Required tank volume</th>
+              <th >Most common tank volume</th>
+              <th >Actions</th>
             </tr>
           </thead>
           <tbody>
             <form action='' method='post'>
               <tr>
-                <td width='25%'>$print->fish_id <input type='hidden' id='uptid' name='uptid' value='$print->fish_id'></td>
-                <td width='25%'><input type='text' id='uptname' name='uptname' value='$print->name'></td>
-                <td width='25%'><input type='text' id='uptnewshort_description' name='uptnewshort_description' value='$print->short_description'></td>
-                <td width='25%'><input type='text' id='uptnewminimum_volume' name='uptnewminimum_volume' value='$print->minimum_volume'></td>
-                <td width='25%'><input type='text' id='uptnewlargest_minimum_volume' name='uptnewlargest_minimum_volume' value='$print->largest_minimum_volume'></td>
-                <td width='25%'><button id='uptsubmit' name='uptsubmit' type='submit'>UPDATE</button> <a href='admin.php?page=" . __FILE__ . "'><button type='button'>CANCEL</button></a></td>
+                <td >$print->fish_id <input type='hidden' id='uptid' name='uptid' value='$print->fish_id'></td>
+                <td ><input type='text' id='uptname' name='uptname' value='$print->name'></td>
+                <td ><input type='text' id='uptnewshort_description' name='uptnewshort_description' value='$print->short_description'></td>
+                <td ><input type='number' id='uptnewminimum_tank_volume' name='uptnewminimum_tank_volume' value='$print->minimum_tank_volume'></td>
+                <td ><input type='number' id='uptnewrequired_tank_volume' name='uptnewrequired_tank_volume' value='$print->required_tank_volume'></td>
+                <td ><input type='number' id='uptnewmost_common_tank_volume' name='uptnewmost_common_tank_volume' value='$print->most_common_tank_volume'></td>
+                <td ><button id='uptsubmit' name='uptsubmit' type='submit'>UPDATE</button> <a href='admin.php?page=" . __FILE__ . "'><button type='button'>CANCEL</button></a></td>
               </tr>
             </form>
           </tbody>
@@ -117,23 +122,25 @@ class Fishmap_Admin {
 <!--                    <th width="25%">Fish ID</th>-->
                     <th width="25%"><a href="<?php echo $siteUrl . "/wp-admin/admin.php?page=" . __FILE__ . "&orderBy=name" ?>">Name</a></th>
                     <th width="25%">Short description</th>
-                    <th width="25%">Minimum volume</th>
-                    <th width="25%">Largest minimum volume</th>
+                    <th width="25%">Minimum tank volume</th>
+                    <th width="25%">Required tank volume</th>
+                    <th width="25%">Most common tank volume</th>
                     <th width="25%">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php
-                $result = Fishmap_DB::getAllFishes($_GET['orderBy'] ? $_GET['orderBy'] : 'name');
+                $result = Fishmap_DB::getAllFishes(isset($_GET['orderBy']) ? $_GET['orderBy'] : 'name');
                 foreach ($result as $print) {
                     echo "
               <tr>
-<!--                 <td width='25%'>$print->fish_id</td>-->
-                <td width='25%'>$print->name</td>
-                <td width='25%'>$print->short_description</td>
-                <td width='25%'>$print->minimum_volume</td>
-                <td width='25%'>$print->largest_minimum_volume</td>
-                <td width='25%'><a href='admin.php?page=" . __FILE__ . "&upt=$print->fish_id'><button type='button'>UPDATE</button></a> <a href='admin.php?page=" . __FILE__ . "&del=$print->fish_id'><button type='button'>DELETE</button></a></td>
+<!--                 <td >$print->fish_id</td>-->
+                <td >$print->name</td>
+                <td >$print->short_description</td>
+                <td >$print->minimum_tank_volume</td>
+                <td >$print->required_tank_volume</td>
+                <td >$print->most_common_tank_volume</td>
+                <td ><a href='admin.php?page=" . __FILE__ . "&upt=$print->fish_id'><button type='button'>UPDATE</button></a> <a href='admin.php?page=" . __FILE__ . "&del=$print->fish_id'><button type='button'>DELETE</button></a></td>
               </tr>
             ";
                 }

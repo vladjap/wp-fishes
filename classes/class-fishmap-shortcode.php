@@ -22,24 +22,39 @@ class Fishmap_Shortcode {
         add_shortcode('fishes_map', [$this, 'fishesMapShortcodeCallback']);
     }
 
-    private function createRuleTableTR($rule, $text) {
+    private function createRuleTableTR($rule, $text, $tankWarning = false) {
+        $tankWarningHTML = '';
+        $tankWarningCSSClass = '';
+        if ($tankWarning && $rule !== 'incompatible') {
+            $tankWarningHTML = "
+                <div class='fishmap-tooltip'><span class='fishmap-tooltip-i'>i</span>
+                  <span class='fishmap-tooltiptext'>Tank volume warning message</span>
+                </div>
+            ";
+            $tankWarningCSSClass = 'fishmap-rule-table-tr-tank-warning';
+        }
         return  "
-          <tr class='fishmap-rule-table-tr fishmap-$rule-tr'>
-            <td>$text</td>
+          <tr class='fishmap-rule-table-tr fishmap-$rule-tr $tankWarningCSSClass'>
+            <td>$text $tankWarningHTML</td>
           </tr>
         ";
     }
 
-    private function createSelectedFishHtml($selectedFish) {
+    private function createSelectedFishHtml($selectedFish, $tankWarning) {
         if (!$selectedFish) {
             return '';
         }
+        $tankWarningHTML = '';
+        if ($tankWarning) {
+            $tankWarningHTML = "<div class='fishmap-selected-fish-tank-warning'>Warning for tank</div>";
+        }
         return "
-        <div>
-            <div>name: $selectedFish->name</div>
-            <div>short_description: $selectedFish->short_description</div>
-            <div>minimum_volume: $selectedFish->minimum_volume</div>
-            <div>largest_minimum_volume: $selectedFish->largest_minimum_volume</div>
+        <div class='fishmap-selected-fish-box'>
+            <div class='fishmap-selected-fish-box-item'>name: $selectedFish->name</div>
+            <div class='fishmap-selected-fish-box-item'>short_description: $selectedFish->short_description</div>
+            <div class='fishmap-selected-fish-box-item'>minimum_volume: $selectedFish->minimum_volume</div>
+            <div class='fishmap-selected-fish-box-item'>largest_minimum_volume: $selectedFish->largest_minimum_volume</div>
+            $tankWarningHTML
         </div>
         ";
     }
@@ -243,7 +258,7 @@ class Fishmap_Shortcode {
         ";
     }
 
-    private function handle3SelectSelected($selectValue, $secondSelectValue, $thirdSelectValue) {
+    private function handle3SelectSelected($selectValue, $secondSelectValue, $thirdSelectValue, $tankSize) {
         $selectedFirstFish = Fishmap_DB::getFishById($selectValue);
         $selectedSecondFish = Fishmap_DB::getFishById($secondSelectValue);
         $selectedThirdFish = Fishmap_DB::getFishById($thirdSelectValue);
@@ -268,13 +283,6 @@ class Fishmap_Shortcode {
         $incompatibleFishsTRTagsHtmlFirstFish = '';
         $maybeFishesTRTagsHtmlFirstFish = '';
 
-        // ako prva dva izabrana nisu kompatibilna sve ulazi u ne
-        // ako su prva dva kompatibilna onda poredimo dalje
-        // kada u pricu udje treca riba, poredi se sa prve 2 i jedno ne je ne.
-        // Jedno mozda i jedno da su mozda.
-        // Mozda i ne su ne
-//        $isAllIncompatible = $this->isAllIncompatible($selectedFirstFishResultResult, $selectedSecondFishResultResult, $selectedThirdFishResultResult);
-
         $firstAndSecond = Fishmap_DB::getRelationByIds($selectValue, $secondSelectValue);
         if ($firstAndSecond) {
             $firstAndSecond = $firstAndSecond[0];
@@ -287,38 +295,74 @@ class Fishmap_Shortcode {
         if ($secondAndThird) {
             $secondAndThird = $secondAndThird[0];
         }
+        $firstSelectedTankWarning = false;
+        $secondSelectedTankWarning = false;
+        $thirdSelectedTankWarning = false;
+
+        if ($tankSize) {
+            $firstSelectedTankWarning = $this->isTankSizeForFishTooSmall($tankSize, $selectedFirstFish);
+            $secondSelectedTankWarning = $this->isTankSizeForFishTooSmall($tankSize, $selectedSecondFish);
+            $thirdSelectedTankWarning = $this->isTankSizeForFishTooSmall($tankSize, $selectedThirdFish);
+        }
+
         $ruleGroupedForSelected = $this->groupRules([$firstAndSecond->status, $firstAndThird->status, $secondAndThird->status]);
 
+        $compArr = [];
+        $cautionArr = [];
         foreach ($selectedFirstFishResultResult as $print) {
             if ($print->status === 'no' || $ruleGroupedForSelected === 'no') {
                 $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
             }
             if ($print->status !== 'no' && $ruleGroupedForSelected !== 'no') {
+                $currentFishTankWarning = false;
+                if ($print->second_fish_minimum_tank_size && $tankSize) {
+                    $currentFishTankWarning = intval($tankSize) < intval($print->second_fish_minimum_tank_size);
+                }
 
-                $withSecond  = $this->getRelationRule($selectedSecondFishResultResult, $print->second_fish_id);
-                $withThird  = $this->getRelationRule($selectedThirdFishResultResult, $print->second_fish_id);
+                $firstWithSecond = $this->getRelationRule($selectedSecondFishResultResult, $print->second_fish_id);
+                $firstWithThird = $this->getRelationRule($selectedThirdFishResultResult, $print->second_fish_id);
+                $secondWithThird = $this->getRelationRule($selectedThirdFishResultResult, $secondSelectValue);
 
                 $groupRule = $this->groupRules([
-                    $print->status, $withSecond, $withThird,
+                    $print->status, $firstWithSecond, $firstWithThird, $secondWithThird
                 ]);
+
                 if ($groupRule === 'yes') {
-                    $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name);
+                    $compArr[] = ['status' => 'compatible', 'fish_name' => $print->second_fish_name, 'tankWarning' => $currentFishTankWarning];
                 }
                 if ($groupRule === 'no') {
                     $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
                 }
                 if ($groupRule === 'caution') {
-                    $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name);
+                    $cautionArr[] = ['status' => 'caution', 'fish_name' => $print->second_fish_name, 'tankWarning' => $currentFishTankWarning];
                 }
             }
         }
-        $selectedFirstFishHtml = $this->createSelectedFishHtml($selectedFirstFish);
-        $selectedSecondFishHtml = $this->createSelectedFishHtml($selectedSecondFish);
-        $selectedThirdFishHtml = $this->createSelectedFishHtml($selectedThirdFish);
+        usort($compArr, function ($item1, $item2) {
+            if ($item1['tankWarning'] == $item2['tankWarning']) return 0;
+            return $item1['tankWarning'] < $item2['tankWarning'] ? -1 : 1;
+        });
+        usort($cautionArr, function ($item1, $item2) {
+            if ($item1['tankWarning'] == $item2['tankWarning']) return 0;
+            return $item1['tankWarning'] < $item2['tankWarning'] ? -1 : 1;
+        });
+        for($i = 0; $i < count($compArr); $i++) {
+            $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $cautionArr[$i]['fish_name'], $cautionArr[$i]['tankWarning']);
+        }
+        for($i = 0; $i < count($cautionArr); $i++) {
+            $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $cautionArr[$i]['fish_name'], $cautionArr[$i]['tankWarning']);
+        }
+        $selectedFirstFishHtml = $this->createSelectedFishHtml($selectedFirstFish, $firstSelectedTankWarning);
+        $selectedSecondFishHtml = $this->createSelectedFishHtml($selectedSecondFish, $secondSelectedTankWarning);
+        $selectedThirdFishHtml = $this->createSelectedFishHtml($selectedThirdFish, $thirdSelectedTankWarning);
         $compatibleRuleTableFirstFish = $this->createRuleTable($compatibleFishsTRTagsHtmlFirstFish, 'Compatible with', 'compatible');
         $incompatibleRuleTableFirstFish = $this->createRuleTable($incompatibleFishsTRTagsHtmlFirstFish, 'Incompatible with', 'incompatible');
         $maybeRuleTableFirstFish = $this->createRuleTable($maybeFishesTRTagsHtmlFirstFish, 'Caution', 'caution');
 
+        $tankSelectedHTML = '';
+        if ($tankSize) {
+            $tankSelectedHTML = 'Selected tank size is: ' . $tankSize;
+        }
         return  "
             <div class='fishmap-selected-fishes-wrapper'>
                 <div class='fishmap-selected-first-fish'>
@@ -334,6 +378,7 @@ class Fishmap_Shortcode {
                     $selectedThirdFishHtml
                 </div>
             </div>
+            $tankSelectedHTML
             <div class='fishmap-rule-tables-wrapper'>
                 $compatibleRuleTableFirstFish
                 $incompatibleRuleTableFirstFish
@@ -355,18 +400,35 @@ class Fishmap_Shortcode {
 
         return "
             <form action='' method='post'>
-                <select name='test-select'>
-                    $selectOptions
-                </select>
-                <select name='second-select'>
-                    $secondSelectOptions
-                </select>
-                <select name='third-select'>
-                    $thirdSelectOptions
-                </select>
-                <button type='submit' name='submit-f' value='submited'>submit</button>
+                <div class='fishmap-sc-selects-wrapper'>
+                    <select name='test-select'>
+                        $selectOptions
+                    </select>
+                    <select class='not-first-select' name='second-select'>
+                        $secondSelectOptions
+                    </select>
+                    <select class='not-first-select' name='third-select'>
+                        $thirdSelectOptions
+                    </select>     
+                </div>
+                <div class='fishmap-sc-other-wrapper'>
+                    <input class='fishmap-tank-size-input' type='number' name='tank-size' placeholder='Tank size'>
+                    <button type='submit' name='submit-f' value='submited'>Submit</button>
+                </div>
+                
             </form>
             ";
+    }
+
+    private function isTankSizeForFishTooSmall($tankSize, $fish) {
+        $tankSizeInt = intval($tankSize);
+        if ($fish->minimum_tank_volume) {
+            $firstMinimumTankVolume = intval($fish->minimum_tank_volume);
+            if ($tankSizeInt < $firstMinimumTankVolume) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function fishesMapShortcodeCallback() {
@@ -380,10 +442,10 @@ class Fishmap_Shortcode {
             $htmlFishRelationsTable = $this->handleBothSelectSelected($_POST['test-select'], $_POST['second-select']);
         }
         if($_POST['test-select']  && $_POST['second-select'] !== 'none' && $_POST['third-select'] !== 'none') {
-            $htmlFishRelationsTable = $this->handle3SelectSelected($_POST['test-select'], $_POST['second-select'], $_POST['third-select']);
+            $htmlFishRelationsTable = $this->handle3SelectSelected($_POST['test-select'], $_POST['second-select'], $_POST['third-select'], $_POST['tank-size']);
         }
 
-        $htmlSelectForm =$this->generateForm($result);
+        $htmlSelectForm = $this->generateForm($result);
 
         return "
             $htmlSelectForm

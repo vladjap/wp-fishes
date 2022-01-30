@@ -23,3 +23,52 @@
 .fishmap-selected-first-fish h3, .fishmap-selected-second-fish h3 {
     border-bottom: 1px solid gray;
 }
+
+.fishmap-sc-selects-wrapper {
+    display: flex;
+}
+
+.not-first-select {
+    margin-left: 5px;
+}
+.fishmap-sc-other-wrapper {
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+.fishmap-tank-size-input {
+    margin: 0 !important;
+    max-width: 200px !important;
+}
+
+.fishmap-tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+    cursor: pointer;
+}
+
+.fishmap-tooltip .fishmap-tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #eeeeb4;
+    color: #000;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the fishmap-tooltip */
+    position: absolute;
+    z-index: 1;
+}
+
+.fishmap-tooltip:hover .fishmap-tooltiptext {
+    visibility: visible;
+}
+
+.fishmap-tooltip-i {
+    color: red;
+}
+
+.fishmap-rule-table-tr-tank-warning {
+    background: #ffffad;
+}
