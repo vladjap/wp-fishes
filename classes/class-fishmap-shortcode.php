@@ -96,7 +96,7 @@ class Fishmap_Shortcode {
         ";
     }
 
-    private function handleSingleSelectSelected($selectValue) {
+    private function handleSingleSelectSelected($selectValue, $tankSize) {
         $selectedFish = Fishmap_DB::getFishById($selectValue);
         if (!$selectedFish) {
             return "Selected fish not exists";
@@ -107,12 +107,16 @@ class Fishmap_Shortcode {
         $incompatibleFishsTRTagsHtmlFirstFish = '';
         $maybeFishesTRTagsHtmlFirstFish = '';
         foreach ($selectedResult as $print) {
+            $currentFishTankWarning = false;
+            if ($print->second_fish_minimum_tank_size && $tankSize) {
+                $currentFishTankWarning = intval($tankSize) < intval($print->second_fish_minimum_tank_size);
+            }
             if ($print->status === 'yes') {
-                $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name);
+                $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name, $currentFishTankWarning);
             } else if ($print->status === 'no') {
                 $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
             } else if ($print->status === 'caution') {
-                $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
+                $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name, $currentFishTankWarning);
             }
         }
 
@@ -198,7 +202,7 @@ class Fishmap_Shortcode {
         return false;
     }
 
-    private function handleBothSelectSelected($selectValue, $secondSelectValue) {
+    private function handleBothSelectSelected($selectValue, $secondSelectValue, $tankSize) {
         $selectedFirstFish = Fishmap_DB::getFishById($selectValue);
         $selectedSecondFish = Fishmap_DB::getFishById($secondSelectValue);
         if (!$selectedFirstFish) {
@@ -227,29 +231,33 @@ class Fishmap_Shortcode {
                 $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
             }
             if ($print->status !== 'no' && !$isAllIncompatible) {
+                $currentFishTankWarning = false;
+                if ($print->second_fish_minimum_tank_size && $tankSize) {
+                    $currentFishTankWarning = intval($tankSize) < intval($print->second_fish_minimum_tank_size);
+                }
                 for ($i = 0; $i < count($selectedSecondFishResultResult); $i++) {
                     if ($print->status === 'yes' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
                         if ($selectedSecondFishResultResult[$i]->status === 'yes') {
-                            $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name);
+                            $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name, $currentFishTankWarning);
                             break;
                         } else if ($selectedSecondFishResultResult[$i]->status === 'no') {
                             $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
                             break;
                         } else if ($selectedSecondFishResultResult[$i]->status === 'caution') {
-                            $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name);
+                            $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name, $currentFishTankWarning);
                         }
                     } else if ($print->status === 'no' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
                         $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
                         break;
                     } else if ($print->status === 'caution' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
                         if ($selectedSecondFishResultResult[$i]->status === 'yes') {
-                            $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name);
+                            $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name, $currentFishTankWarning);
                             break;
                         } else if ($selectedSecondFishResultResult[$i]->status === 'no') {
                             $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
                             break;
                         } else if ($selectedSecondFishResultResult[$i]->status === 'caution') {
-                            $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name);
+                            $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name, $currentFishTankWarning);
                         }
                     }
                 }
@@ -454,10 +462,10 @@ class Fishmap_Shortcode {
         $htmlFishRelationsTable = '';
 
         if($_POST['test-select']  && ($_POST['second-select'] === 'none' || !$_POST['second-select'])) {
-            $htmlFishRelationsTable = $this->handleSingleSelectSelected($_POST['test-select']);
+            $htmlFishRelationsTable = $this->handleSingleSelectSelected($_POST['test-select'], $_POST['tank-size']);
         }
         if($_POST['test-select']  && $_POST['second-select'] !== 'none' && $_POST['third-select'] === 'none') {
-            $htmlFishRelationsTable = $this->handleBothSelectSelected($_POST['test-select'], $_POST['second-select']);
+            $htmlFishRelationsTable = $this->handleBothSelectSelected($_POST['test-select'], $_POST['second-select'], $_POST['tank-size']);
         }
         if($_POST['test-select']  && $_POST['second-select'] !== 'none' && $_POST['third-select'] !== 'none') {
             $htmlFishRelationsTable = $this->handle3SelectSelected($_POST['test-select'], $_POST['second-select'], $_POST['third-select'], $_POST['tank-size']);
