@@ -120,7 +120,7 @@ class Fishmap_Shortcode {
             }
         }
 
-        $selectedFishHtml = $this->createSelectedFishHtml($selectedFish);
+        $selectedFishHtml = $this->createSelectedFishHtml($selectedFish, false);
         $compatibleRuleTable = $this->createRuleTable($compatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_compatible'), 'compatible');
         $incompatibleRuleTable = $this->createRuleTable($incompatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_incompatible'), 'incompatible');
         $maybeRuleTable = $this->createRuleTable($maybeFishesTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_caution'), 'caution');
@@ -264,8 +264,8 @@ class Fishmap_Shortcode {
             }
         }
 
-        $selectedFirstFishHtml = $this->createSelectedFishHtml($selectedFirstFish);
-        $selectedSecondFishHtml = $this->createSelectedFishHtml($selectedSecondFish);
+        $selectedFirstFishHtml = $this->createSelectedFishHtml($selectedFirstFish, false);
+        $selectedSecondFishHtml = $this->createSelectedFishHtml($selectedSecondFish, false);
         $compatibleRuleTableFirstFish = $this->createRuleTable($compatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_compatible'), 'compatible');
         $incompatibleRuleTableFirstFish = $this->createRuleTable($incompatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_incompatible'), 'incompatible');
         $maybeRuleTableFirstFish = $this->createRuleTable($maybeFishesTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_caution'), 'caution');
