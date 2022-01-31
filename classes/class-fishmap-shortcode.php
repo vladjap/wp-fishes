@@ -106,20 +106,38 @@ class Fishmap_Shortcode {
         $compatibleFishsTRTagsHtmlFirstFish = '';
         $incompatibleFishsTRTagsHtmlFirstFish = '';
         $maybeFishesTRTagsHtmlFirstFish = '';
+        $compArr = [];
+        $cautionArr = [];
         foreach ($selectedResult as $print) {
             $currentFishTankWarning = false;
             if ($print->second_fish_minimum_tank_size && $tankSize) {
                 $currentFishTankWarning = intval($tankSize) < intval($print->second_fish_minimum_tank_size);
             }
             if ($print->status === 'yes') {
-                $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name, $currentFishTankWarning);
+                $compArr[] = ['status' => 'compatible', 'fish_name' => $print->second_fish_name, 'tankWarning' => $currentFishTankWarning];
+//                $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name, $currentFishTankWarning);
             } else if ($print->status === 'no') {
                 $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
             } else if ($print->status === 'caution') {
-                $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name, $currentFishTankWarning);
+//                $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name, $currentFishTankWarning);
+                $cautionArr[] = ['status' => 'caution', 'fish_name' => $print->second_fish_name, 'tankWarning' => $currentFishTankWarning];
             }
         }
 
+        usort($compArr, function ($item1, $item2) {
+            if ($item1['tankWarning'] == $item2['tankWarning']) return 0;
+            return $item1['tankWarning'] < $item2['tankWarning'] ? -1 : 1;
+        });
+        usort($cautionArr, function ($item1, $item2) {
+            if ($item1['tankWarning'] == $item2['tankWarning']) return 0;
+            return $item1['tankWarning'] < $item2['tankWarning'] ? -1 : 1;
+        });
+        for($i = 0; $i < count($compArr); $i++) {
+            $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $compArr[$i]['fish_name'], $compArr[$i]['tankWarning']);
+        }
+        for($i = 0; $i < count($cautionArr); $i++) {
+            $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $cautionArr[$i]['fish_name'], $cautionArr[$i]['tankWarning']);
+        }
         $selectedFishHtml = $this->createSelectedFishHtml($selectedFish, false);
         $compatibleRuleTable = $this->createRuleTable($compatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_compatible'), 'compatible');
         $incompatibleRuleTable = $this->createRuleTable($incompatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_incompatible'), 'incompatible');
@@ -225,6 +243,8 @@ class Fishmap_Shortcode {
         // kada u pricu udje treca riba, poredi se sa prve 2 i jedno ne je ne.
         // Jedno mozda i jedno da su mozda.
         // Mozda i ne su ne
+        $compArr = [];
+        $cautionArr = [];
         $isAllIncompatible = $this->isAllIncompatible($selectedFirstFishResultResult, $selectedSecondFishResultResult);
         foreach ($selectedFirstFishResultResult as $print) {
             if ($print->status === 'no' || $isAllIncompatible) {
@@ -238,30 +258,49 @@ class Fishmap_Shortcode {
                 for ($i = 0; $i < count($selectedSecondFishResultResult); $i++) {
                     if ($print->status === 'yes' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
                         if ($selectedSecondFishResultResult[$i]->status === 'yes') {
-                            $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name, $currentFishTankWarning);
+//                            $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $print->second_fish_name, $currentFishTankWarning);
+                            $compArr[] = ['status' => 'compatible', 'fish_name' => $print->second_fish_name, 'tankWarning' => $currentFishTankWarning];
                             break;
                         } else if ($selectedSecondFishResultResult[$i]->status === 'no') {
                             $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
                             break;
                         } else if ($selectedSecondFishResultResult[$i]->status === 'caution') {
-                            $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name, $currentFishTankWarning);
+                            $cautionArr[] = ['status' => 'caution', 'fish_name' => $print->second_fish_name, 'tankWarning' => $currentFishTankWarning];
+//                            $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name, $currentFishTankWarning);
                         }
                     } else if ($print->status === 'no' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
                         $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
                         break;
                     } else if ($print->status === 'caution' && $selectedSecondFishResultResult[$i]->second_fish_id === $print->second_fish_id) {
                         if ($selectedSecondFishResultResult[$i]->status === 'yes') {
-                            $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name, $currentFishTankWarning);
+                            $cautionArr[] = ['status' => 'caution', 'fish_name' => $print->second_fish_name, 'tankWarning' => $currentFishTankWarning];
+//                            $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $print->second_fish_name, $currentFishTankWarning);
                             break;
                         } else if ($selectedSecondFishResultResult[$i]->status === 'no') {
                             $incompatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('incompatible', $print->second_fish_name);
                             break;
                         } else if ($selectedSecondFishResultResult[$i]->status === 'caution') {
-                            $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name, $currentFishTankWarning);
+                            $cautionArr[] = ['status' => 'caution', 'fish_name' => $print->second_fish_name, 'tankWarning' => $currentFishTankWarning];
+//                            $maybeFishesTRTagsHtmlFirstFish .=$this->createRuleTableTR('caution', $print->second_fish_name, $currentFishTankWarning);
                         }
                     }
                 }
             }
+        }
+
+        usort($compArr, function ($item1, $item2) {
+            if ($item1['tankWarning'] == $item2['tankWarning']) return 0;
+            return $item1['tankWarning'] < $item2['tankWarning'] ? -1 : 1;
+        });
+        usort($cautionArr, function ($item1, $item2) {
+            if ($item1['tankWarning'] == $item2['tankWarning']) return 0;
+            return $item1['tankWarning'] < $item2['tankWarning'] ? -1 : 1;
+        });
+        for($i = 0; $i < count($compArr); $i++) {
+            $compatibleFishsTRTagsHtmlFirstFish .= $this->createRuleTableTR('compatible', $compArr[$i]['fish_name'], $compArr[$i]['tankWarning']);
+        }
+        for($i = 0; $i < count($cautionArr); $i++) {
+            $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $cautionArr[$i]['fish_name'], $cautionArr[$i]['tankWarning']);
         }
 
         $selectedFirstFishHtml = $this->createSelectedFishHtml($selectedFirstFish, false);
