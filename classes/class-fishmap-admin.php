@@ -78,7 +78,7 @@ class Fishmap_Admin {
                     <span class="fishmap-settings-labels-label">Fish tank warning message:</span>
                     <input type="text" name="fish-tank-warning-message" value="<?php echo $fishTankWarningMessageFromStore ?>">
                 </label>
-                <input type="submit" name="fish-tank-warning-message-submit">
+                <input class="button action" type="submit" name="fish-tank-warning-message-submit">
             </form>
         </div>
         <?php
@@ -104,7 +104,7 @@ class Fishmap_Admin {
                     <span class="fishmap-selected-fish-label">Smallest Minimum volume by any member</span>
                     <input type="text" name="fishmap-selected-fish-min-tank-volume-label" value="<?php echo $selectedFishMinTankVolumeLabelFromStore ?>">
                 </label>
-                <input type="submit" name="fishmap-selected-fish-min-tank-volume-label-submit">
+                <input class="button action" type="submit" name="fishmap-selected-fish-min-tank-volume-label-submit">
             </form>
         </div>
         <div class="fishmap-selected-fish-labels-form-wrapper">
@@ -113,7 +113,7 @@ class Fishmap_Admin {
                     <span class="fishmap-selected-fish-label">Largest required minimum volume by any member</span>
                     <input type="text" name="fishmap-selected-fish-largest-required-min-tank-volume-label" value="<?php echo $selectedFishLargestRequiredMinTankVolumeLabelFromStore ?>">
                 </label>
-                <input type="submit" name="fishmap-selected-fish-largest-required-min-tank-volume-label-submit">
+                <input class="button action" type="submit" name="fishmap-selected-fish-largest-required-min-tank-volume-label-submit">
             </form>
         </div>
         <div class="fishmap-selected-fish-labels-form-wrapper">
@@ -122,7 +122,7 @@ class Fishmap_Admin {
                     <span class="fishmap-selected-fish-label">Minimum volume most common for the group</span>
                     <input type="text" name="fishmap-selected-fish-min-most-common-tank-volume-label" value="<?php echo $selectedFishMinMostCommonTankVolumeLabelFromStore ?>">
                 </label>
-                <input type="submit" name="fishmap-selected-fish-min-most-common-tank-volume-label-submit">
+                <input class="button action" type="submit" name="fishmap-selected-fish-min-most-common-tank-volume-label-submit">
             </form>
         </div>
 
@@ -150,7 +150,7 @@ class Fishmap_Admin {
                     <span class="fishmap-settings-labels-label">Label for compatible</span>
                     <input type="text" name="fishmap-table-header-text-compatible" value="<?php echo $tableHeaderTextCompatibleFromStore ?>">
                 </label>
-                <input type="submit" name="fishmap-table-header-text-compatible-submit">
+                <input class="button action" type="submit" name="fishmap-table-header-text-compatible-submit">
             </form>
         </div>
         <div class="fishmap-table-header-text-form-wrapper">
@@ -159,7 +159,7 @@ class Fishmap_Admin {
                     <span class="fishmap-settings-labels-label">Label for incompatible</span>
                     <input type="text" name="fishmap-table-header-text-incompatible" value="<?php echo $tableHeaderTextIncompatibleFromStore ?>">
                 </label>
-                <input type="submit" name="fishmap-table-header-text-incompatible-submit">
+                <input class="button action" type="submit" name="fishmap-table-header-text-incompatible-submit">
             </form>
         </div>
         <div class="fishmap-table-header-text-form-wrapper">
@@ -168,7 +168,7 @@ class Fishmap_Admin {
                     <span class="fishmap-settings-labels-label">Label for caution</span>
                     <input type="text" name="fishmap-table-header-text-caution" value="<?php echo $tableHeaderTextCautionFromStore ?>">
                 </label>
-                <input type="submit" name="fishmap-table-header-text-caution-submit">
+                <input class="button action" type="submit" name="fishmap-table-header-text-caution-submit">
             </form>
         </div>
         <?php
@@ -210,7 +210,7 @@ class Fishmap_Admin {
                 <div class="fishmap-add-new-fish-input-wrapper"><input type="number" id="newminimum_tank_volume" name="newminimum_tank_volume" placeholder="Minimum tank volume"></div>
                 <div class="fishmap-add-new-fish-input-wrapper"><input type="number" id="newrequired_tank_volume" name="newrequired_tank_volume" placeholder="Required tank volume"></div>
                 <div class="fishmap-add-new-fish-input-wrapper"><input type="number" id="newmost_common_tank_volume" name="newmost_common_tank_volume" placeholder="Most common tank volume"></div>
-                <div class="fishmap-add-new-fish-input-wrapper"><button id="newsubmit" name="newsubmit" type="submit">INSERT</button></div>
+                <div class="fishmap-add-new-fish-input-wrapper"><button class="button action" id="newsubmit" name="newsubmit" type="submit">Insert</button></div>
             </form>
 
             <br>
@@ -249,7 +249,7 @@ class Fishmap_Admin {
                 <td ><input type='number' id='uptnewminimum_tank_volume' name='uptnewminimum_tank_volume' value='$print->minimum_tank_volume'></td>
                 <td ><input type='number' id='uptnewrequired_tank_volume' name='uptnewrequired_tank_volume' value='$print->required_tank_volume'></td>
                 <td ><input type='number' id='uptnewmost_common_tank_volume' name='uptnewmost_common_tank_volume' value='$print->most_common_tank_volume'></td>
-                <td ><button id='uptsubmit' name='uptsubmit' type='submit'>UPDATE</button> <a href='admin.php?page=" . __FILE__ . "'><button type='button'>CANCEL</button></a></td>
+                <td ><button id='uptsubmit' name='uptsubmit' type='submit' class='button action'>Update</button> <a href='admin.php?page=" . __FILE__ . "'><button class='action button' type='button'>Cancel</button></a></td>
               </tr>
             </form>
           </tbody>
@@ -261,13 +261,13 @@ class Fishmap_Admin {
             <table id="fishmap-fish-table" class="wp-list-table widefat striped">
                 <thead>
                 <tr>
-<!--                    <th width="25%">Fish ID</th>-->
-                    <th width="25%"><a href="<?php echo $siteUrl . "/wp-admin/admin.php?page=" . __FILE__ . "&orderBy=name" ?>">Name</a></th>
-                    <th width="25%">Short description</th>
-                    <th width="25%">Minimum tank volume</th>
-                    <th width="25%">Required tank volume</th>
-                    <th width="25%">Most common tank volume</th>
-                    <th width="25%">Actions</th>
+<!--                    <th >Fish ID</th>-->
+                    <th ><a href="<?php echo $siteUrl . "/wp-admin/admin.php?page=" . __FILE__ . "&orderBy=name" ?>">Name</a></th>
+                    <th >Short description</th>
+                    <th >Minimum tank volume</th>
+                    <th >Required tank volume</th>
+                    <th >Most common tank volume</th>
+                    <th >Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -282,7 +282,7 @@ class Fishmap_Admin {
                 <td >$print->minimum_tank_volume</td>
                 <td >$print->required_tank_volume</td>
                 <td >$print->most_common_tank_volume</td>
-                <td ><a href='admin.php?page=" . __FILE__ . "&upt=$print->fish_id'><button type='button'>UPDATE</button></a> <a href='admin.php?page=" . __FILE__ . "&del=$print->fish_id'><button type='button'>DELETE</button></a></td>
+                <td ><a href='admin.php?page=" . __FILE__ . "&upt=$print->fish_id'><button class='action button' type='button'>Update</button></a> <a href='admin.php?page=" . __FILE__ . "&del=$print->fish_id'><button class='fishmap-delete-button' type='button'>Delete</button></a></td>
               </tr>
             ";
                 }
@@ -330,7 +330,7 @@ class Fishmap_Admin {
         echo "</select></div>";
 
 
-        echo "<button id='set_new_relation' name='set_new_relation' type='submit'>Set rule</button>";
+        echo "<button class='button action' id='set_new_relation' name='set_new_relation' type='submit'>Set rule</button>";
 
         echo "</form>";
 
