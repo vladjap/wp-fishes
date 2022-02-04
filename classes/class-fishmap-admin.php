@@ -14,6 +14,7 @@ require_once __DIR__ . '/class-fishmap-db.php';
  * Class Fishmap_Admin
  */
 class Fishmap_Admin {
+    const IS_IMPORT_ENABLED = true;
 
     /**
      * Fishmap_Admin constructor.
@@ -31,8 +32,25 @@ class Fishmap_Admin {
         add_menu_page('Fish map', 'Fish map', 'manage_options' ,__FILE__, [$this, 'fishesAdminPage'], 'dashicons-palmtree');
         add_submenu_page( __FILE__, 'Fish relations', 'Fish relations', 'manage_options', 'fish-relations', [$this, 'fishRelationsPage']);
         add_submenu_page( __FILE__, 'Fish settings', 'Fish settings', 'manage_options', 'fish-settings', [$this, 'fishSettingsPage']);
+        add_submenu_page( __FILE__, 'Fish logs', 'Fish logs', 'manage_options', 'fish-logs', [$this, 'fishLogsPage']);
+        if (self::IS_IMPORT_ENABLED) {
+            add_submenu_page( __FILE__, 'Fish import', 'Fish import', 'manage_options', 'fish-import', [$this, 'fishImportPage']);
+        }
     }
 
+    public function fishImportPage() {
+        if (self::IS_IMPORT_ENABLED) {
+            include_once FISHMAP_PLUGIN_PATH . '/classes/class-fishmap-import.php';
+            $fishmapImport = new Fishmap_Import();
+            $fishmapImport->init();
+        }
+    }
+
+    public function fishLogsPage() {
+        include_once FISHMAP_PLUGIN_PATH . '/classes/class-fishmap-logs.php';
+        $fishmapLogs = new Fishmap_Logs();
+        $fishmapLogs->init();
+    }
     public function fishSettingsPage() {
         if (isset($_POST['fish-tank-warning-message-submit'])) {
             update_option('fish_tank_warning_message', $_POST['fish-tank-warning-message']);
@@ -57,13 +75,57 @@ class Fishmap_Admin {
         if (isset($_POST['fishmap-selected-fish-min-most-common-tank-volume-label-submit'])) {
             update_option('fishmap_selected_fish_min_most_common_tank_volume', $_POST['fishmap-selected-fish-min-most-common-tank-volume-label']);
         }
+        if (isset($_POST['fishmap-main-desc-submit'])) {
+            update_option('fish_main_description', $_POST['fishmap-main-desc']);
+        }
+        if (isset($_POST['fishmap-submit-desc-submit'])) {
+            update_option('fish_submit_description', $_POST['fishmap-submit-desc']);
+        }
 
         ?>
             <h1>Fishmap plugin settings</h1>
         <?php
+        $this->createMainDescriptionForm();
+        $this->createSubmitDescriptionForm();
         $this->createFishTankWarningMessageForm();
         $this->createTableHeaderTextForms();
         $this->createSelectedFishLabelForms();
+    }
+
+    private function createMainDescriptionForm() {
+        $fishMainDescription = get_option( 'fish_main_description' );
+        if (!$fishMainDescription) {
+            update_option('fish_main_description', 'This is main description');
+        }
+        ?>
+        <div class="fishmap-main-desc-form-wrapper">
+            <form class="fishmap-main-desc-form" method="post" action="">
+                <label class="fishmap-label-settings">
+                    <span class="fishmap-settings-labels-label">Main description:</span>
+                    <input type="text" name="fishmap-main-desc" value="<?php echo $fishMainDescription ?>">
+                </label>
+                <input class="button action" type="submit" name="fishmap-main-desc-submit">
+            </form>
+        </div>
+        <?php
+    }
+
+    private function createSubmitDescriptionForm() {
+        $fishSubmitDescription = get_option( 'fish_submit_description' );
+        if (!$fishSubmitDescription) {
+            update_option('fish_submit_description', 'This is submit description');
+        }
+        ?>
+        <div class="fishmap-submit-desc-form-wrapper">
+            <form class="fishmap-submit-desc-form" method="post" action="">
+                <label class="fishmap-label-settings">
+                    <span class="fishmap-settings-labels-label">Submit description:</span>
+                    <input type="text" name="fishmap-submit-desc" value="<?php echo $fishSubmitDescription ?>">
+                </label>
+                <input class="button action" type="submit" name="fishmap-submit-desc-submit">
+            </form>
+        </div>
+        <?php
     }
 
     private function createFishTankWarningMessageForm() {

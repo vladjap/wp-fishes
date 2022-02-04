@@ -453,14 +453,34 @@ class Fishmap_Shortcode {
     }
 
     private function generateForm($result) {
-        $selectOptions = '';
+        $submitDescription = get_option('fish_submit_description');
+
+        $selectOptions = '<option value="none">Select 1st option</option>';
         $secondSelectOptions = '<option value="none"></option>';
         $thirdSelectOptions = '<option value="none"></option>';
 
         foreach ($result as $print) {
-            $selectOptions .= "<option value='$print->fish_id'>$print->name</option>";
-            $secondSelectOptions .= "<option value='$print->fish_id'>$print->name</option>";
-            $thirdSelectOptions .= "<option value='$print->fish_id'>$print->name</option>";
+            $firstFishSelected = '';
+            $secondFishSelected = '';
+            $thirdFishSelected = '';
+            if ($_POST['test-select'] === $print->fish_id) {
+                $firstFishSelected = 'selected';
+            }
+            if ($_POST['second-select'] === $print->fish_id) {
+                $secondFishSelected = 'selected';
+            }
+            if ($_POST['third-select'] === $print->fish_id) {
+                $thirdFishSelected = 'selected';
+            }
+            $selectOptions .= "<option $firstFishSelected value='$print->fish_id'>$print->name</option>";
+            $secondSelectOptions .= "<option $secondFishSelected value='$print->fish_id'>$print->name</option>";
+            $thirdSelectOptions .= "<option $thirdFishSelected value='$print->fish_id'>$print->name</option>";
+        }
+
+        $tankSizeValueHTMLPart = '';
+        if ($_POST['tank-size']) {
+            $tankSize = $_POST['tank-size'];
+            $tankSizeValueHTMLPart = "value='$tankSize'";
         }
 
         return "
@@ -477,8 +497,10 @@ class Fishmap_Shortcode {
                     </select>     
                 </div>
                 <div class='fishmap-sc-other-wrapper'>
-                    <input class='fishmap-tank-size-input' type='number' name='tank-size' placeholder='Tank size'>
-                    <button type='submit' name='submit-f' value='submited'>Submit</button>
+                    <input class='fishmap-tank-size-input' type='number' name='tank-size' placeholder='Tank size (gallons)' $tankSizeValueHTMLPart>
+                    <div class='fishmap-submit-desc-front-wrapper'>$submitDescription</div>  
+                    <div><button type='submit' name='submit-f' value='submited'>Submit</button></div>
+                    
                 </div>
                 
             </form>
@@ -502,17 +524,23 @@ class Fishmap_Shortcode {
 
         if($_POST['test-select']  && ($_POST['second-select'] === 'none' || !$_POST['second-select'])) {
             $htmlFishRelationsTable = $this->handleSingleSelectSelected($_POST['test-select'], $_POST['tank-size']);
+            Fishmap_DB::insertLog($_POST['test-select'], null, null, $_POST['tank-size']);
         }
         if($_POST['test-select']  && $_POST['second-select'] !== 'none' && $_POST['third-select'] === 'none') {
             $htmlFishRelationsTable = $this->handleBothSelectSelected($_POST['test-select'], $_POST['second-select'], $_POST['tank-size']);
+            Fishmap_DB::insertLog($_POST['test-select'],  $_POST['second-select'], null, $_POST['tank-size']);
         }
         if($_POST['test-select']  && $_POST['second-select'] !== 'none' && $_POST['third-select'] !== 'none') {
             $htmlFishRelationsTable = $this->handle3SelectSelected($_POST['test-select'], $_POST['second-select'], $_POST['third-select'], $_POST['tank-size']);
+            Fishmap_DB::insertLog($_POST['test-select'],  $_POST['second-select'], $_POST['third-select'], $_POST['tank-size']);
         }
 
         $htmlSelectForm = $this->generateForm($result);
 
+        $mainDescription = get_option('fish_main_description');
+
         return "
+            <h3>$mainDescription</h3>
             $htmlSelectForm
             $htmlFishRelationsTable
        ";

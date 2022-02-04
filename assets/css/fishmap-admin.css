@@ -90,3 +90,14 @@
     white-space: nowrap;
     box-sizing: border-box;;
 }
+
+.fishmap-logs-pagination-current-page-indicator {
+
+}
+
+.fishmap-submit-desc-form-wrapper {
+    margin-top: 10px;
+}
+.fishmap-fish-tank-warning-message-form-wrapper {
+    margin-top: 10px;
+}

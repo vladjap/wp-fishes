@@ -154,3 +154,7 @@
         flex-direction: column;
     }
 }
+
+.fishmap-submit-desc-front-wrapper {
+    margin: 10px 0 15px;
+}
