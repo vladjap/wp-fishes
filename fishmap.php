@@ -5,7 +5,7 @@
  * Description: Fishmap
  * Author: Ajvan
  * Author URI: https://site.com/
- * Version: 1.0.0
+ * Version: 1.4.0
  * Text Domain: Fishmap
  * Domain Path: /languages
  *
@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'FISHMAP_MAIN_FILE', __FILE__ );
 define( 'FISHMAP_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'FISHMAP_PLUGIN_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
-define( 'FISHMAP_PLUGIN_VERSION', '1.3.0' );
+define( 'FISHMAP_PLUGIN_VERSION', '1.4.0' );
 
 if ( ! class_exists( 'Fishmap' ) ) {
     /**
