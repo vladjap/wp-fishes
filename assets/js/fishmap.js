@@ -30,11 +30,17 @@ jQuery( function( $ ) {
         });
 
         $('.fishmap-rule-tables-table thead').on('click', function () {
-            if (!$(this.parentElement).hasClass('fishmap-rule-table-active')) {
-                $('.fishmap-rule-table-active').removeClass('fishmap-rule-table-active');
+            // console.log(this.parentElement, 'this.parentElement');
+            if ($(this.parentElement).hasClass('fishmap-rule-table-active')) {
+                $(this.parentElement.querySelector('tbody')).slideUp();
+                $(this.parentElement).removeClass('fishmap-rule-table-active');
+                // $('.fishmap-rule-table-active').removeClass('fishmap-rule-table-active');
+            } else {
+                $(this.parentElement.querySelector('tbody')).slideDown();
                 $(this.parentElement).addClass('fishmap-rule-table-active');
             }
-            console.log('dadada', this.parentElement.parentElement)
+
+
         })
     });
 });

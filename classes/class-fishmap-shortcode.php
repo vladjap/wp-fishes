@@ -99,7 +99,7 @@ class Fishmap_Shortcode {
     }
 
     private function createRuleTable($fishsTRTagsHtml, $thTitle, $rule, $active) {
-        $activeClass = '';
+        $activeClass = 'fishmap-rule-table-active';
         if ($active) {
             $activeClass = 'fishmap-rule-table-active';
         }
@@ -172,8 +172,18 @@ class Fishmap_Shortcode {
         $maybeRuleTable = $this->createRuleTable($maybeFishesTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_caution'), 'caution', false);
 
         return  "
-            <div class='fishmap-tabs-fishmap-selected-first-fish'>
-                $selectedFishHtml
+            <div class='fishmap-selected-fishes-wrapper'>
+                <div class='fishmap-tabs-header'>
+                    <div data-tab-id='99' class='fishmap-tabs-header-item fishmap-tab-header-item-active'>
+                        <div><h5>Batfish</h5></div>
+                    </div>
+                </div>
+                <div class='fishmap-tabs-content'>
+                    <div data-tab-content-id='99' class='fishmap-tab-content fishmap-tab-content-active fishmap-selected-first-fish'>
+                        $selectedFishHtml
+                    </div>
+                </div>
+ 
             </div>
             <div class='fishmap-rule-tables-wrapper'>
                 $compatibleRuleTable
@@ -330,8 +340,11 @@ class Fishmap_Shortcode {
         for($i = 0; $i < count($cautionArr); $i++) {
             $maybeFishesTRTagsHtmlFirstFish .= $this->createRuleTableTR('caution', $cautionArr[$i]['fish_name'], $cautionArr[$i]['tankWarning']);
         }
+        $tabHeaderSelectedFirstFish = $this->createSelectedFishHeadersHtml($selectedFirstFish, true);
 
         $selectedFirstFishHtml = $this->createSelectedFishHtml($selectedFirstFish, false);
+        $tabHeaderSelectedSecondFish = $this->createSelectedFishHeadersHtml($selectedSecondFish, false);
+
         $selectedSecondFishHtml = $this->createSelectedFishHtml($selectedSecondFish, false);
         $compatibleRuleTableFirstFish = $this->createRuleTable($compatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_compatible'), 'compatible', true);
         $incompatibleRuleTableFirstFish = $this->createRuleTable($incompatibleFishsTRTagsHtmlFirstFish, get_option('fishmap_table_header_text_incompatible'), 'incompatible', false);
@@ -339,11 +352,17 @@ class Fishmap_Shortcode {
 
         return  "
             <div class='fishmap-selected-fishes-wrapper'>
-                <div class='fishmap-selected-first-fish'>
-                    $selectedFirstFishHtml
+                <div class='fishmap-tabs-header'>
+                    $tabHeaderSelectedFirstFish
+                    $tabHeaderSelectedSecondFish
                 </div>
-                <div class='fishmap-selected-second-fish'>
-                    $selectedSecondFishHtml
+                <div class='fishmap-tabs-content'>
+                    <div data-tab-content-id='$selectedFirstFish->fish_id' class='fishmap-tab-content fishmap-tab-content-active fishmap-selected-first-fish'>
+                        $selectedFirstFishHtml
+                    </div>
+                    <div data-tab-content-id='$selectedSecondFish->fish_id' class='fishmap-tab-content fishmap-selected-second-fish'>
+                        $selectedSecondFishHtml
+                    </div>      
                 </div>
             </div>
             <div class='fishmap-rule-tables-wrapper'>
@@ -497,7 +516,7 @@ class Fishmap_Shortcode {
     private function generateForm($result) {
         $submitDescription = get_option('fish_submit_description');
 
-        $selectOptions = '<option value="none">Select 1st option</option>';
+        $selectOptions = '<option value="">Select 1st option</option>';
         $secondSelectOptions = '<option value="none"></option>';
         $thirdSelectOptions = '<option value="none"></option>';
 
@@ -528,7 +547,7 @@ class Fishmap_Shortcode {
         return "
             <form action='' method='post'>
                 <div class='fishmap-sc-selects-wrapper'>
-                    <select name='test-select'>
+                    <select required name='test-select'>
                         $selectOptions
                     </select>
                     <select class='not-first-select' name='second-select'>

@@ -166,7 +166,7 @@ p.fishmap-selected-fish-box-item {
         display: none;
     }
     .fishmap-rule-tables-table.fishmap-rule-table-active tbody{
-        display: table-row-group;
+        display: block;
     }
 
     .fishmap-rule-table-th-title-icon-wrap {
@@ -174,6 +174,19 @@ p.fishmap-selected-fish-box-item {
         justify-content: space-between;
     }
     .fishmap-rule-table-th-icon-wrap {
+        display: block;
+    }
+    .fishmap-rule-table-active img{
+        transform: rotate(180deg); /* Equal to rotateZ(45deg) */
+        transition: 350ms;
+    }
+    .fishmap-rule-tables-table img{
+        transition: 350ms;
+    }
+    .fishmap-rule-tables-table tbody {
+        display:block;
+    }
+    .fishmap-rule-table-tr {
         display: block;
     }
 }
@@ -294,5 +307,5 @@ p.fishmap-selected-fish-box-item {
     .fishmap-selected-fishes-wrapper .fishmap-tabs-header {
         flex-direction: column;
     }
-
 }
+
