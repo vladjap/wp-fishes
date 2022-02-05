@@ -33,7 +33,7 @@ class Fishmap_Assets {
         wp_register_script(
             'fishmap',
             plugins_url( 'assets/js/fishmap.js', FISHMAP_MAIN_FILE ),
-            array(),
+            array('jquery'),
             FISHMAP_PLUGIN_VERSION,
             true
         );

@@ -101,3 +101,24 @@
 .fishmap-fish-tank-warning-message-form-wrapper {
     margin-top: 10px;
 }
+
+.fishmap-pagination-button {
+    border: 0;
+    background: none;
+    margin: 0 5px;
+    padding: 0;
+    color: #2271b1;
+    transition-property: border,background,color;
+    transition-duration: .05s;
+    transition-timing-function: ease-in-out;
+    outline: 0;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.fishmap-logs-pagination-link {
+    margin: 0 5px;
+}
+
+.fishmap-logs-pagination-wrapper {
+    display: flex;
+}

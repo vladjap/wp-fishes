@@ -216,28 +216,52 @@ JOIN wp_fishes_relations ON wp_fishes.fish_id = wp_fishes_relations.fish_id" . $
     }
 
     // LOGS FUNCTIONS START HERE:
-    public static function getLogs($page, $limit)
+    public static function getLogs($page, $limit, $filters)
     {
         if (!$page) {
             $page = 1;
         }
         if (!$limit) {
-            $limit = 3;
+            $limit = 10;
         }
 
         global $wpdb;
-
+        $fishFilterQueryPart = null;
+        $dateRangeFilterQueryPart = null;
+        $tankSizeQueryPart = null;
+        $pagination = true;
+        $paginationQueryPart = null;
         $offset = ($page  - 1) * $limit;
         $table_name = $wpdb->prefix . self::TABLE_NAME_FISHES_LOGS;
         $fish_table_name = $wpdb->prefix . self::TABLE_NAME_FISHES;
+
+        if ($filters) {
+            $dateRangeFilterQueryPart = self::createQueryBetweenPart($filters);
+            $tankSizeQueryPart = self::createTankSizeQueryPart($filters);
+            $fishFilterQueryPart = self::createQuerySelectedFishPart($filters);
+        }
+
+        if ($pagination) {
+            $paginationQueryPart = "LIMIT $limit OFFSET $offset";
+        }
+
         $sql = "
         SELECT log_id, fish_id, second_fish_id, third_fish_id, tank_size, created, 
 (SELECT name FROM $fish_table_name WHERE fish_id = wp_fishes_logs.fish_id) as fish_name,
 (SELECT name FROM $fish_table_name WHERE fish_id = wp_fishes_logs.second_fish_id) as second_fish_name,
 (SELECT name FROM $fish_table_name WHERE fish_id = wp_fishes_logs.third_fish_id) as third_fish_name
 FROM $table_name 
-LIMIT $limit OFFSET $offset
+$dateRangeFilterQueryPart
+$tankSizeQueryPart
+$fishFilterQueryPart
+$paginationQueryPart
         ";
+
+        if($filters) {
+//            echo $sql;
+//            die;
+        }
+
         return $wpdb->get_results($sql);
 
     }
@@ -250,10 +274,74 @@ LIMIT $limit OFFSET $offset
         $wpdb->query($sql);
     }
 
-    public static function getNumberOfLogs() {
+    private static function createQueryBetweenPart($filters) {
+        $dateRangeFilterQueryPart = '';
+        if ($filters['date_from'] && $filters['date_to']) {
+            $dateFrom = $filters['date_from'];
+            $dateTo = $filters['date_to'];
+            $dateRangeFilterQueryPart = "
+                    WHERE (created BETWEEN '$dateFrom' AND '$dateTo')
+                "; // format: 2010-01-30 14:15:55
+        }
+        return $dateRangeFilterQueryPart;
+    }
+
+    private static function createTankSizeQueryPart($filters) {
+        $tankSizeQueryPart = '';
+        if ($filters['tank_size'] && $filters['tank_size_condition']) {
+            $whereOrAnd = isset($filters['date_from']) && isset($filters['date_to']) ? 'AND' : 'WHERE';
+            $tankSize = $filters['tank_size'];
+            $condition = $filters['tank_size_condition'];
+            if ($condition === 'eq') {
+                $tankSizeQueryPart = "
+                    $whereOrAnd tank_size=$tankSize
+                ";
+            } else if ($condition === 'lt') {
+                $tankSizeQueryPart = "
+                    $whereOrAnd tank_size<$tankSize AND tank_size>0 
+                ";
+            } else if ($condition === 'gt') {
+                $tankSizeQueryPart = "
+                    $whereOrAnd tank_size>$tankSize AND tank_size>0 
+                ";
+            }
+
+        }
+
+        return $tankSizeQueryPart;
+    }
+
+    private static function createQuerySelectedFishPart($filters) {
+        $fishFilterQueryPart = '';
+        $fishFilter = null;
+        if ($filters['fish']) {
+//            $whereOrOr = count($filters) === 1 ? 'WHERE' : 'AND';
+            $fishFilter = $filters['fish'];
+            $whereOrAnd = (isset($filters['date_from']) && isset($filters['date_to'])) || isset($filters['tank_size']) ? 'AND' : 'WHERE';
+            $fishFilterQueryPart = "
+$whereOrAnd (fish_id=$fishFilter
+OR second_fish_id=$fishFilter
+OR third_fish_id=$fishFilter)
+            ";
+        }
+
+        return $fishFilterQueryPart;
+    }
+
+    public static function getNumberOfLogs($filters) {
         global $wpdb;
         $table_name = $wpdb->prefix . self::TABLE_NAME_FISHES_LOGS;
-        $sql = "SELECT COUNT(log_id) as length FROM " . $table_name;
+        $fishFilterQueryPart = null;
+        $dateRangeFilterQueryPart = null;
+        $tankSizeQueryPart = null;
+        if ($filters) {
+            $dateRangeFilterQueryPart = self::createQueryBetweenPart($filters);
+            $tankSizeQueryPart = self::createTankSizeQueryPart($filters);
+            $fishFilterQueryPart = self::createQuerySelectedFishPart($filters);
+        }
+
+        $sql = "SELECT COUNT(log_id) as length FROM $table_name $dateRangeFilterQueryPart $tankSizeQueryPart $fishFilterQueryPart";
+
         $res = $wpdb->get_results($sql);
         if (!$res || count($res) <= 0) {
             return 0;

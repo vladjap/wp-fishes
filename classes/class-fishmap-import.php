@@ -53,7 +53,7 @@ class Fishmap_Import {
         if($_FILES['file']['name'] != ''){
             $uploadedFile = $_FILES['file'];
             $row = 1;
-            $rowFishNames = [];
+//            $rowFishNames = [];
             if (($handle = fopen($uploadedFile['tmp_name'], "r")) !== FALSE) {
                 while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                     if ($row === 1) {
@@ -63,10 +63,8 @@ class Fishmap_Import {
                     } else {
                         echo "Imported: $data[0], $data[3], $data[5], $data[1]" . '<br>';
                         Fishmap_DB::setTankSizesForFishByName($data[0], $data[3], $data[5], $data[1]);
-                        //$minTankVolume, $requiredTankVolume, $mostCommonTankVolume)
                     }
-                    //setTankSizesForFishByName
-                    $num = count($data);
+//                    $num = count($data);
                     $row++;
 
                 }

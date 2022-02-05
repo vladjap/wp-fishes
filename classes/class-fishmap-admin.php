@@ -14,7 +14,7 @@ require_once __DIR__ . '/class-fishmap-db.php';
  * Class Fishmap_Admin
  */
 class Fishmap_Admin {
-    const IS_IMPORT_ENABLED = true;
+    const IS_IMPORT_ENABLED = false;
 
     /**
      * Fishmap_Admin constructor.
